@@ -1,0 +1,187 @@
+\documentclass{tufte-book}
+\usepackage{graphicx}  % werken met figuren
+\usepackage{gensymb} % werken met wetenschappelijke eenheden\usepackage{geometry}
+\usepackage{changepage} % http://ctan.org/pkg/changepage
+\usepackage[dutch,british]{babel} % instelling van de taal (woordsplitsing, spellingscontrole)
+\usepackage[parfill]{parskip} % Paragrafen gescheiden door witte lijn en geen inspringing
+\usepackage[font=small,skip=3pt]{caption} % Minder ruimte tussen figuur/table en ondertitel. Ondertitel klein
+\usepackage{capt-of}
+\usepackage{indentfirst}
+\setlength{\parindent}{0.7cm}
+\usepackage{enumitem} % Laat enumerate werken met letters
+\usepackage{url}
+\usepackage{lipsum}
+\setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+% Prints a trailing space in a smart way.
+\usepackage{xspace}
+\usepackage{hyperref}
+\usepackage{amsmath}
+
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+
+% Alter some LaTeX defaults for better treatment of figures:
+% See p.105 of "TeX Unbound" for suggested values.
+% See pp. 199-200 of Lamport's "LaTeX" book for details.
+%   General parameters, for ALL pages:
+    \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+    \renewcommand{\bottomfraction}{0.9}	% max fraction of floats at bottom
+%   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4}     % 2 may work better
+    \renewcommand{\textfraction}{0.1}	% allow minimal text w. figs
+%   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.8}	% require fuller float pages
+% N.B.: floatpagefraction MUST be less than topfraction !!
+\setcounter{secnumdepth}{3}
+
+\newcommand{\tthdump}[1]{#1}
+
+\newcommand{\openepigraph}[2]{
+  \begin{fullwidth}
+  \sffamily\large
+    \begin{doublespace}
+      \noindent\allcaps{#1}\\ % epigraph
+      \noindent\allcaps{#2} % author
+    \end{doublespace}
+  \end{fullwidth}
+}
+
+
+\usepackage{makeidx}
+\makeindex
+
+\title{Newton-Raphson method}
+\author{Jan Trommelmans}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE,prefix.string=NR}
+\setkeys{Gin}{width=1.1\marginparwidth} %% Sweave
+
+<<echo=FALSE>>=
+library(tidyverse)
+library(gridExtra)
+library(scatterplot3d)
+@
+
+% Setting the ggplot theme:
+<<echo=FALSE>>=
+JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
+                  panel.background = element_blank(),
+                  panel.grid.major = element_line(colour = "gray85"),
+                  panel.grid.minor = element_line(colour = "gray85"),
+                  panel.grid.major.x = element_line(colour = "gray85"),
+                  axis.text = element_text(size = 8 , face = "bold"),
+                  axis.title = element_text(size = 9 , face = "bold"),
+                  plot.title = element_text(size = 12 , face = "bold"),
+                  strip.text = element_text(size = 8 , face = "bold"),
+                  strip.background = element_rect(colour = "black"),
+                  legend.text = element_text(size = 8),
+                  legend.title = element_text(size = 9 , face = "bold"),
+                  legend.background = element_rect(fill = "white"),
+                  legend.key = element_rect(fill = "white"))
+@
+
+% Functions
+
+\frontmatter
+\chapter*{Newton-Raphson method for finding the maximum of a function}
+
+\mainmatter
+\chapter{Function of one variable}
+
+\section{Taylor approximation}
+Taylor's Theorem says that if a function $f(x)$ is $(k+1)$ times differentiable on an open interval I, than for any two points $x$ and $x+h$ in I there exists a point $w$ between $x$ and $x+h$ such that:
+\begin{equation}
+f(x+h)=f(x) + f'(x)h + \frac{1}{2}f''(x)h^{2}+ \ldots + \frac{1}{k!}f^{k}(x)h^{k} + \frac{1}{(k+1)!}f^{k+1}(w)h^{k+1}
+\label{Taylor1v}
+\end{equation}
+
+For small values of $h$ (in the limit when $h$ goes to $0$) the higher order terms in \ref{eq:Taylor1v} go to $0$ much faster than $h$ itself. In that case (small values of $h$) we can approximate the function, keeping only a restricted number of terms. The first and second order Taylor approximations are
+\begin{equation}
+  \begin{split}
+  f(x) &\approx f(x+h) + f'(x)h \\
+  f(x) &\approx f(x=h) + f'(x)h + \frac{1}{2}f''(x)h^{2}
+  \end{split}
+\end{equation}
+
+\section{Finding the maximum of the function}
+A function $f(x)$ reaches a (local) maximym for $x=\hat{x}$ when
+\begin{equation}
+  \begin{split}
+  f'(\hat{x})&=0 \\
+  f''(\hat{x})&<0
+  \end{split}
+\end{equation}
+
+Suppose that $\hat{x}$, where $f(x)$ reaches a maximum, lies close to point $x=x_{0}$. Then we can use the second order Taylor approximation in the neighbourhood of $x_{0}$:
+\begin{equation}
+f(x_{0}+h) \approx f(x_{0}) + f'(x_0)h + \frac{1}{2}f''(x_{0})h^{2}
+\end{equation}
+
+The value $\hat{h}$ for which $\hat{x}=x_{0}+\hat{h}$ can then be found from
+\begin{equation}
+\frac{d}{dh}f(x_{0}+\hat(h)=f'(x_{0})+f''(x_{0})\hat{h}=0
+\end{equation}
+
+or
+\begin{equation}
+\hat{h}=-\frac{f'(x_{0})}{f''(x_{0})}
+\end{equation}
+
+This will not insure that $\hat{x}=x_{0}+\hat{h}$ will be where $f(x)$ reaches its maximum. This is because the second order Taylor approximation is just that: an approximation, and because it is only valid for small values of $h$. An iterative process is needed that gradually gets us to a value of $\hat{x}$ where the value of $f'(\hat{x})$ is close enough to zero. What ''close enough" is, is our own choice.
+
+\section{Examples}
+
+The examples are taken from the topic of the Likelihood Function in statistics. There are different methods for estimating model parameters of a distribution. One of these methods uses the Likelihood Function (or its logaritm). Sometimes an analytical solution is possible, but sometimes we have to use a numerical technique such as the Newton-Raphson method.
+
+\subsection{Estimating the mean $\mu$ of a normal distribution with known variance $\sigma^{2}$}
+
+This is a classic starting point for estimating parameters in statistics textbooks and we can find an unbiased estimator as follows:
+
+We have $X \sim \mathcal{N}(\mu,\,\sigma^{2})$. We take a sample $(x_{1}, x_{2}, \ldots x_{n})$ of size $n$ from this distribution. Then we know that $X_{1} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $X_{2} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $\ldots$ $X_{n} \sim \mathcal{N}(\mu,\,\sigma^{2})$. This means that the derived chance variable $\bar{X}=\frac{1}{n}(X_{1}+X_{2} + \ldots + X_{n})$ will be $\bar{X} \sim \mathcal{N}(\mu,\,\frac{\sigma^{2}}{n})$. Therefore $\bar{x}= \frac{1}{n}(x_{1}+x_{2} + \ldots + x_{n})$ will be an unbiased estimater of $\mu$.
+
+The \emph{Method of the Maximum Likelihood} takes a different approach. Suppose we estimate that the value for $\mu$ is $\mu_1$. Knowing that $X \sim \mathcal{N}(\mu,\,\sigma^{2})$, we can calculate the probability of our first observation in the sample:
+\begin{equation}
+P[X=x_{1}|\mu=\mu_{1}]=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{1}-\mu_{1}}{\sigma})^{2}}
+\end{equation}
+
+For all other values in the sample we can calculate this probability. Assuming that all samples are independent, the total probability of having this specific sample with this estimate of $\mu=\mu_{1}$, will be equal to the product of all the individual probabilities. We call this the Likelihood of this sample:
+\begin{equation}
+\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu=\mu_{1})=\prod_{i=1}^{i=n}P[X=x_{i}|\mu=\mu_{1}]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{i}-\mu_{1}}{\sigma})^{2}}
+\end{equation}
+
+For a different estimate $\mu=\mu_{2}$ we will get a different value for the Likelihood of the sample. In general: the Likelihood of the sample is a function of $\mu$:
+\begin{equation}
+\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu)=\prod_{i=1}^{i=n}P[X=x_{i}|\mu]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{i}-\mu}{\sigma})^{2}}
+\end{equation}
+
+Instead of working with the \emph{Likelihood function}, it is easier to work with the (natural) logarithm of this function, the \emph{Log Likelihood function}:
+\begin{equation}
+\ell((x_{1},x_{2}, \ldots x_{n})|\mu)=ln(\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu))=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}(\frac{x_{i}-\mu}{\sigma})^{2}
+\end{equation}
+
+Both functions reache a maximum for the same value of $\mu=\hat{\mu}$. We find $\hat{\mu}$ from
+\begin{equation}
+\frac{d}{d\mu}\ell((x_{1},x_{2}, \ldots x_{n})|\mu)= \sum_{i=1}^{i=n}\frac{x_{i}-\hat{\mu}}{\sigma}=0
+\end{equation}
+or
+\begin{equation}
+\hat{\mu}=\frac{\sum_{i=1}^{i=n}x_{i}}{n}=\bar{x}
+\end{equation}
+
+The Method of Maximum Likelihood gives the same estimate!
+
+
+
+
+\newpage
+\textbf{Thanks} \\
+\medskip
+R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+\medskip
+<<>>=
+sessionInfo()
+@
+
+\end{document}
