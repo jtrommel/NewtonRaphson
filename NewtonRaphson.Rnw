@@ -127,6 +127,7 @@ The value $\hat{h}$ for which $\hat{x}=x_{0}+\hat{h}$ can then be found from
 or
 \begin{equation}
 \hat{h}=-\frac{f'(x_{0})}{f''(x_{0})}
+\label{eq:hat_h}
 \end{equation}
 
 This will not insure that $\hat{x}=x_{0}+\hat{h}$ will be where $f(x)$ reaches its maximum. This is because the second order Taylor approximation is just that: an approximation, and because it is only valid for small values of $h$. An iterative process is needed that gradually gets us to a value of $\hat{x}$ where the value of $f'(\hat{x})$ is close enough to zero. What ''close enough" is, is our own choice.
@@ -137,16 +138,22 @@ The examples are taken from the topic of the Likelihood Function in statistics. 
 
 \subsection{Estimating the mean $\mu$ of a normal distribution with known variance $\sigma^{2}$}
 
-This is a classic starting point for estimating parameters in statistics textbooks and we can find an unbiased estimator as follows:
+This is a classic starting point for estimating parameters in statistics textbooks.
 
+\newthought{We can find an unbiased estimator as follows}:
+\newline
 We have $X \sim \mathcal{N}(\mu,\,\sigma^{2})$. We take a sample $(x_{1}, x_{2}, \ldots x_{n})$ of size $n$ from this distribution. Then we know that $X_{1} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $X_{2} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $\ldots$ $X_{n} \sim \mathcal{N}(\mu,\,\sigma^{2})$. This means that the derived chance variable $\bar{X}=\frac{1}{n}(X_{1}+X_{2} + \ldots + X_{n})$ will be $\bar{X} \sim \mathcal{N}(\mu,\,\frac{\sigma^{2}}{n})$. Therefore $\bar{x}= \frac{1}{n}(x_{1}+x_{2} + \ldots + x_{n})$ will be an unbiased estimater of $\mu$.
+\begin{equation}
+estimate(\mu)=\bar{x}=\frac{\sum_{i=1}^{i=n}x_{i}}{n}
+\label{eq:estimate_xbar}
+\end{equation}
 
-The \emph{Method of the Maximum Likelihood} takes a different approach. Suppose we estimate that the value for $\mu$ is $\mu_1$. Knowing that $X \sim \mathcal{N}(\mu,\,\sigma^{2})$, we can calculate the probability of our first observation in the sample:
+\newthought{The Method of the Maximum Likelihood} takes a different approach. Suppose we estimate that the value for $\mu$ is $\mu_1$. Knowing that $X \sim \mathcal{N}(\mu,\,\sigma^{2})$, we can calculate the probability of our first observation in the sample:
 \begin{equation}
 P[X=x_{1}|\mu=\mu_{1}]=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{1}-\mu_{1}}{\sigma})^{2}}
 \end{equation}
 
-For all other values in the sample we can calculate this probability. Assuming that all samples are independent, the total probability of having this specific sample with this estimate of $\mu=\mu_{1}$, will be equal to the product of all the individual probabilities. We call this the Likelihood of this sample:
+For all the other observations in the sample we can calculate their probability. Assuming that all observations are independent, the total probability of having this specific sample with this particular estimate of $\mu=\mu_{1}$, will be equal to the product of all the individual probabilities. We call this the Likelihood of this sample:
 \begin{equation}
 \mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu=\mu_{1})=\prod_{i=1}^{i=n}P[X=x_{i}|\mu=\mu_{1}]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{i}-\mu_{1}}{\sigma})^{2}}
 \end{equation}
@@ -158,21 +165,207 @@ For a different estimate $\mu=\mu_{2}$ we will get a different value for the Lik
 
 Instead of working with the \emph{Likelihood function}, it is easier to work with the (natural) logarithm of this function, the \emph{Log Likelihood function}:
 \begin{equation}
-\ell((x_{1},x_{2}, \ldots x_{n})|\mu)=ln(\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu))=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}(\frac{x_{i}-\mu}{\sigma})^{2}
+\ell((x_{1},x_{2}, \ldots x_{n})|\mu)=ln(\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu))=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}\left( \frac{x_{i}-\mu}{\sigma} \right) ^{2}
 \end{equation}
 
-Both functions reache a maximum for the same value of $\mu=\hat{\mu}$. We find $\hat{\mu}$ from
+Both functions have a maximum for the same value of $\mu=\hat{\mu}$. We find $\hat{\mu}$ from
 \begin{equation}
-\frac{d}{d\mu}\ell((x_{1},x_{2}, \ldots x_{n})|\mu)= \sum_{i=1}^{i=n}\frac{x_{i}-\hat{\mu}}{\sigma}=0
+\frac{d}{d\mu}\ell((x_{1},x_{2}, \ldots x_{n})|\hat{\mu})= \sum_{i=1}^{i=n}\frac{x_{i}-\hat{\mu}}{\sigma}=0
 \end{equation}
 or
 \begin{equation}
 \hat{\mu}=\frac{\sum_{i=1}^{i=n}x_{i}}{n}=\bar{x}
 \end{equation}
 
-The Method of Maximum Likelihood gives the same estimate!
+In this case the Method of Maximum Likelihood leads to an equation that can be solved analytically and it gives the same result as in equation \ref{eq:estimate_xbar}.
 
+\newthought{Finding the maximum of the Log Likelihood function} is not always possible in an analytical way. Then we have to use a numerical method such as Newton-Raphson. For a numerical solution we need to have a specific situation. Suppose we take a sample of size 10 from a normal distribution with $\mu=100$ and $\sigma=10$:
+<<>>=
+set.seed(2018)
+n <- 10
+mu <- 100
+sigma <- 10
+x <- rnorm(n,mu,sigma)
+@
+Then we calculate the Log Likelihood function for 100 values of $\mu$ ranging from $\mu-2\sigma$ to $\mu+2\sigma$ and make a plot of the Log Likelihood function:
+<<label=llnorm,fig=TRUE,include=FALSE, echo=TRUE>>=
+# ll = Log Likelihood function of mu
+ll <- data.frame(mu=seq(mu-2*sigma,mu+2*sigma,length.out = 100),log.likelihood=0)
+for (i in 1:nrow(ll)) {
+  ll$log.likelihood[i] <- - (1/(2*sigma^2))*sum((x-ll$mu[i])^2)
+}
+ll$log.likelihood <- ll$log.likelihood - n*log(sqrt(2*pi)*sigma)
+ggplot(data=ll, aes(x=mu,y=log.likelihood)) +
+  geom_line() +
+  labs(title = "Log Likelihood of sample (size=10) from N(100,10)",
+       x = expression(mu),
+       y = "ll(mu)") +
+  JT.theme
+@
 
+\begin{marginfigure}
+\includegraphics[width=1\textwidth]{NR-llnorm}
+\caption{}
+\label{fig:llnorm}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+The iteration starts from a value $\mu_{0}$. From there we calculate $\hat{h}$ so that the maximum will be found at $\hat{\mu}=\mu_{0}+\hat{h}$. Intu\"{i}tively, most people would choose $\mu_{0}=\bar{x}$ (and they would be spot on from the first try!). Let us be naive and pick $\mu_{0}=min(x_{i})$. Equation \ref{eq:hat_h} gives us the value of $\hat{h}$ based on the first and second derivative of $\ell(\mu)$. The Log Likelihood function, its 1st and 2nd derivative in this case are:
+\begin{equation}
+\begin{split}
+\ell((x_{1},x_{2}, \ldots x_{n})|\mu)&=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) - \sum_{i=1}^{i=n} \frac{1}{2}\left( \frac{x_{i}-\mu}{\sigma} \right) ^{2} \\
+\frac{d}{d\mu}\ell((x_{1},x_{2}, \ldots x_{n})|\mu)&=\sum_{i=1}^{i=n}\left( \frac{x_{i}-\mu}{\sigma^{2}} \right)\\
+\frac{d^{2}}{d\mu^{2}}\ell((x_{1},x_{2}, \ldots x_{n})|\mu)&= - \frac{n}{\sigma^{2}}
+\end{split}
+\end{equation}
+
+We can see that the second derivative is constant and negative. This means that the extremum will be a maximum (as we can see from Figure~\ref{fig:llnorm}). We will check is the first derivative is zero for $\hat{\mu}$. It probably will not be exactly zero so we have to set a level under which the iteration will be stopped.
+<<>>=
+#
+# Numerical solution with 2nd order Tayler approximation of the log likelihood function
+#
+level <- 1e-5
+# Starting value
+mu0 <- min(x)
+#
+beneath_level <- FALSE
+# Second derivative is a constant
+df2 <- -n/(sigma^2)
+# We keep a record of the values that mu takes on during the iteration
+mu.reposit <- data.frame(mu=mu0)
+while(!beneath_level) {
+  df1 <- sum(x-mu0)/(sigma^2)
+  # Calculate mu_hat
+  mu_hat <- mu0 - df1/df2
+  # Add new value to the repository of mu
+  mu.reposit <- rbind(mu.reposit,mu_hat)
+  # Calculate the first derivative and check if it is close enough to zero (beneath the level)
+  df1 <- sum(x-mu_hat)/(sigma^2)
+  if (abs(df1) < level) {
+    beneath_level <- TRUE
+  }
+  # Put the new value of mu into mu0
+  mu0 <- mu_hat
+}
+paste("The numerical solution is: mu=",mu0)
+paste("The analytical solution is: xbar=",mean(x))
+mu.reposit
+@
+
+As we can see, the numerical iteration needed only one step to find the exact solution. This is because the Log Likelihood function in this case is given by:
+\begin{equation}
+\ell((x_{1},x_{2}, \ldots x_{n})|\mu)=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) - \sum_{i=1}^{i=n} \frac{1}{2}\left( \frac{x_{i}-\mu}{\sigma} \right) ^{2}
+\end{equation}
+This is a quadratic equation in $\mu$, which means that its second order Taylor approximation won't be an approximation, but will be exactly equal to the function.
+
+\subsection{Estimating the probability $\pi$ of a binomial experiment}
+
+When we do an binomial experiment we do $n$ tries where each try can only have two outcomes: ''success" of "failure". Let $X$ be the chance variable that is equal to the number of successes, than this number will depend on the probability of success $\pi$ in each try. $X$ has a Binomial distribution $X \sim \mathcal{B}(\pi)$ and the probability that $X=k$ is given by:
+\begin{equation}
+P[X=k|\pi]={n \choose k}\pi^{k}(1-\pi)^{(n-k)}
+\end{equation}
+
+Suppose we do an experiment with $n=10$ tries. The results of the 10 tries are: $(0, 1, 1, 1, 0, 1, 1, 1, 1, 1)$. The number of successes is $X=8$. Can we make an estimate of $\pi$ based on this result?
+
+The Likelihood for obtaining a ''0" in the first experiment is:
+\begin{equation}
+P[X=x_{1}=0|\pi]=(1-\pi)
+\end{equation}
+
+The Likelihood for obtaining the registred results in all experiments is:
+\begin{equation}
+\begin{split}
+P[X=x_{1}&=0|\pi]=(1-\pi) \\
+P[X=x_{2}&=1|\pi]=\pi \\
+P[X=x_{3}&=1|\pi]=\pi \\
+P[X=x_{4}&=1|\pi]=\pi \\
+P[X=x_{5}&=0|\pi]=(1-\pi) \\
+P[X=x_{6}&=1|\pi]=\pi \\
+P[X=x_{7}&=1|\pi]=\pi \\
+P[X=x_{8}&=1|\pi]=\pi \\
+P[X=x_{9}&=1|\pi]=\pi \\
+P[X=x_{10}&=1|\pi]=\pi
+\end{split}
+\end{equation}
+
+The Likelihood for this result is the product of the probabilities per try:
+\begin{equation}
+\mathcal{L}(x_{1},x_{2}, \ldots x_{10})|\pi)=\prod_{i=1}^{i=10}P[X=x_{i}|\pi]=\pi^{8}(1-\pi)^{2}=\pi^{k}(1-\pi)^{n-k}
+\end{equation}
+
+The Log Likelihood function is:
+\begin{equation}
+\ell(x_{1},x_{2}, \ldots x_{n})|\pi)=k.ln(\pi) + (n-k).ln((1-\pi))
+\end{equation}
+
+It looks like this (Figure~\ref{fig:binom})
+<<label=llbinom,fig=TRUE,include=FALSE, echo=TRUE>>=
+n <- 10
+x <- c(0, 1, 1, 1, 0, 1, 1, 1, 1, 1)
+k <- sum(x)
+# ll = Log Likelihood function of pi
+ll <- data.frame(p=seq(0.01, 0.99, length.out = 100),log.likelihood=0)
+ll$log.likelihood <- k*log(ll$p) + (n - k)*log(1-ll$p)
+ggplot(data=ll, aes(x=p,y=log.likelihood)) +
+  geom_line() +
+  labs(title = "Log Likelihood of binomial experiment",
+       x = expression(pi),
+       y = "ll(pi)") +
+  JT.theme
+@
+
+\begin{marginfigure}
+\includegraphics[width=1\textwidth]{NR-llbinom}
+\caption{}
+\label{fig:llbinom}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+The Log Likelihood function, its first and second derivatives are:
+\begin{equation}
+\begin{split}
+\ell(x_{1},x_{2}, \ldots x_{n})|\pi) &=k.ln(\pi) + (n-k).ln(1-\pi) \\
+\frac{d}{d\pi}\ell(x_{1},x_{2}, \ldots x_{n})|\pi) &=\frac{k}{\pi} - \frac{n-k}{1-\pi} \\
+\frac{d^{2}}{d\pi^{2}}\ell(x_{1},x_{2}, \ldots x_{n})|\pi) &=-\frac{k}{\pi^{2}} -  \frac{n-k}{(1-\pi)^{2}}
+\end{split}
+\end{equation}
+
+Again, the search for the $\pi$-value for which the Log Likelihood function reaches a maximum (we can see that the second derivative is always negative), has an analytical solution because $\frac{d}{d\pi}\ell(x_{1},x_{2}, \ldots x_{n})|\pi)=\frac{k}{\pi} -  \frac{n-k}{1-\pi}=0$ for $\pi=\frac{k}{n}$.
+
+We can find this also numerically, but it will not be so easy because the Log Likelihood function is clearly not quadratic.
+
+<<>>=
+#
+# Numerical solution with 2nd order Tayler approximation of the log likelihood function
+#
+level <- 1e-5
+# Starting value
+p0 <- min(ll$p)
+#
+beneath_level <- FALSE
+# We keep a record of the values that mu takes on during the iteration
+p.reposit <- data.frame(p=p0)
+while(!beneath_level) {
+  df1 <- k/p0 - (n - k)/(1 - p0)
+  df2 <- -k/(p0^2) - (n - k)/((1 - p0)^2)
+  # Calculate p_hat
+  p_hat <- p0 - df1/df2
+  # Add new value to the repository of mu
+  p.reposit <- rbind(p.reposit,p_hat)
+  # Calculate the first derivative and check if it is close enough to zero (beneath the level)
+  df1 <- k/p_hat - (n - k)/(1 - p_hat)
+  if (abs(df1) < level) {
+    beneath_level <- TRUE
+  }
+  # Put the new value of mu into mu0
+  p0 <- p_hat
+}
+paste("The numerical solution is: pi=",p0)
+paste("The analytical solution is: pi=",k/n)
+p.reposit
+@
+
+We find the correct result, but the iteration is much longer because the Taylor approximation in this case is truly an approximation!
 
 
 \newpage
