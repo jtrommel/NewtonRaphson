@@ -418,16 +418,26 @@ We can solve this set of equations quickly in R using matrices. We can write the
 
 with
 \begin{equation}
-  \textbf{A}= \begin{bmatrix} a & b \\ c & d \end{bmatrix}
+  \textbf{A}= \begin{bmatrix} \frac{\partial^{2}}{\partial x^{2}}f(x_{0},y_{0}) & \frac{\partial^{2}}{\partial x \partial y}f(x_{0},y_{0}) \\ \frac{\partial^{2}}{\partial x \partial y}f(x_{0},y_{0}) & \frac{\partial^{2}}{\partial y^{2}}f(x_{0},y_{0}) \end{bmatrix} = \textbf{Hess}(f(x_{0},y_{0}))
 \end{equation}
+the \emph{Hessian} matrix of $f(x,y)$ in $(x_{0},y_{0})$
 
-% or
-% \begin{equation}
-% \hat{h}=-\frac{f'(x_{0})}{f''(x_{0})}
-% \label{eq:hat_h}
-% \end{equation}
-% 
-% This will not insure that $\hat{x}=x_{0}+\hat{h}$ will be where $f(x)$ reaches its maximum. This is because the second order Taylor approximation is just that: an approximation, and because it is only valid for small values of $h$. An iterative process is needed that gradually gets us to a value of $\hat{x}$ where the value of $f'(\hat{x})$ is close enough to zero. What ''close enough" is, is our own choice.
+and
+\begin{equation}
+  \textbf{b}= \begin{bmatrix} - \frac{\partial}{\partial x}f(x_{0},y_{0}) \\ - \frac{\partial}{\partial y}f(x_{0},y_{0}) \end{bmatrix} = \boldsymbol{\nabla}(f(x_{0},y_{0}))
+\end{equation}
+the \emph{gradient} vector of $f(x,y)$ in $(x_{0},y_{0})$
+
+and
+\begin{equation}
+  \textbf{h}= \begin{bmatrix} h_{x} \\ h_{y} \end{bmatrix}
+\end{equation}
+the vector of the values we are calculating.
+
+Again, this will not insure that $(\hat{x}=x_{0}+\hat{h_{x}},\hat{y}=y_{0}+\hat{h_{y}}$ will be where $f(x,y)$ reaches its maximum. The second order Taylor approximation remains an approximation, and is only valid for small values of $(h_{x},h_{y})$. Using an iterative process we can find out if $\frac{\partial}{\partial x}f(\hat{x},\hat{y}) and \frac{\partial}{\partial y}f(\hat{x},\hat{y})$ are close enough to zero. We will use the RMS value to test this condition with
+\begin{equation}
+RMS = \sqrt{\frac{\partial}{\partial x}f(\hat{x},\hat{y})^{2}+\frac{\partial}{\partial y}f(\hat{x},\hat{y})^{2}}
+\end{equation}
 
 \newpage
 \textbf{Thanks} \\
