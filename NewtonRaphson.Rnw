@@ -136,7 +136,7 @@ This will not insure that $\hat{x}=x_{0}+\hat{h}$ will be where $f(x)$ reaches i
 
 The examples are taken from the topic of the Likelihood Function in statistics. There are different methods for estimating model parameters of a distribution. One of these methods uses the Likelihood Function (or its logaritm). Sometimes an analytical solution is possible, but sometimes we have to use a numerical technique such as the Newton-Raphson method.
 
-\subsection{Estimating the mean $\mu$ of a normal distribution with known variance $\sigma^{2}$}
+\subsection{Example 1: Estimating the mean $\mu$ of a normal distribution with known variance $\sigma^{2}$}
 
 This is a classic starting point for estimating parameters in statistics textbooks.
 
@@ -258,7 +258,7 @@ As we can see, the numerical iteration needed only one step to find the exact so
 \end{equation}
 This is a quadratic equation in $\mu$, which means that its second order Taylor approximation won't be an approximation, but will be exactly equal to the function.
 
-\subsection{Estimating the probability $\pi$ of a binomial experiment}
+\subsection{Example 2: Estimating the probability $\pi$ of a binomial experiment}
 
 When we do an binomial experiment we do $n$ tries where each try can only have two outcomes: ''success" of "failure". Let $X$ be the chance variable that is equal to the number of successes, than this number will depend on the probability of success $\pi$ in each try. $X$ has a Binomial distribution $X \sim \mathcal{B}(\pi)$ and the probability that $X=k$ is given by:
 \begin{equation}
@@ -410,7 +410,6 @@ or
 \label{eq:set}
 \end{equation}
 
-
 We can solve this set of equations quickly in R using matrices. We can write the set of equations \ref{eq:set} as follows:
 \begin{equation}
 \textbf{A} \boldsymbol{\cdot} \textbf{h} =\textbf{b}
@@ -438,6 +437,61 @@ Again, this will not insure that $(\hat{x}=x_{0}+\hat{h_{x}},\hat{y}=y_{0}+\hat{
 \begin{equation}
 RMS = \sqrt{\frac{\partial}{\partial x}f(\hat{x},\hat{y})^{2}+\frac{\partial}{\partial y}f(\hat{x},\hat{y})^{2}}
 \end{equation}
+
+\section{Examples}
+
+\subsection{Example 1: Estimating the co\"effici\"ents of a linear regressio model}
+
+Choosing a linear regression model means that we assume that the real relation between a response variable $Y$ and an independent variable $X$ has the form:
+\begin{equation}
+Y = \beta_{0}+\beta_{1}X
+\end{equation}
+
+However, when we take $n$ measurements of couples $(x_{i},y_{i})$ these, in general, do not lie on a straigth line. This is considered to be caused by other unknown or uncontrollable variables. However we assume that the net effect of these disturbances is normally distributed $U \sim \mathcal{N}(0,\sigma^{2})$, and that the value of $\sigma$ is independent of $X$\sidenote{LineaireRegressie.pdf}.
+\begin{equation}
+Y_{i}=\beta_{0}+\beta_{1}X_{i}+U_{i}
+\end{equation}
+Because $\beta_{0}$, $\beta_{1}$ and $X_{i}$ are constants or known values this implies that $Y_{i}$ is normally distributed: $Y_{i} \sim \mathcal{N}(\beta_{0}+\beta_{1}X_{i},\sigma^{2})$
+
+\newthought{The classical method} to estimate $\beta_{0}$ and $\beta_{1}$ is the \emph{Ordinary Least Squares Method}. It minimises $Q$, the sum of the square of the differences between the observed value of $Y$ and the calculated value $\hat{Y}$. 
+\begin{equation}
+Q=\sum\limits_{i=1}^{i=n}\left( Y_{i}-\beta_{0}-\beta_{1}x_{i}  \right)^{2}
+\end{equation}
+
+The minimum is calculated by taking the partial derivatives of $Q$ with respect to $\beta_0$ and $\beta_{1}$, setting these equal to 0, and solving this set of two equations. These two equations are called the \emph{normal equations} \sidenote{Because the calculation is based on one set of $n$ observations, we will not find $\beta_{0}$ and $\beta_{1}$, but estimates $b_{0}$ and $b_{1}$ based on this sample}:
+\begin{equation}
+\begin{cases}
+nb_{0}+b_{1}\sum_{i=1}^{i=n}x_{i}&=\sum_{i=1}^{i=n}y_{i} \\
+b_{0}\sum_{i=1}^{i=n}x_{i}+b_{1}\sum_{i=1}^{i=n}x_{i}^{2}&=\sum_{i=1}{i=n}x_{i}y_{i}
+\end{cases}
+\label{eq:normaleq}
+\end{equation}
+
+The \emph{Gauss-Markov Theorem} proves that the estimates for $\beta_{0}$ and $\beta_{1}$ obtained by the \emph{Ordinary Least Squares Method} are unbiased and have the smallest variance compared with other estimating methods.
+
+\newthought{The Maximum Likelihood Method} uses the assumption that $Y_{i} \sim \mathcal{N}(\beta_{0}+\beta_{1}X_{i},\sigma^{2})$ to calculate the probability of observing the value $y_{i}$ when we use $\beta_{0}=\beta_{0}^{*}$ and $\beta_{1}=\beta_{1}^{*}$ as estimates for $\beta_{0}$ and $\beta_{1}$:
+\begin{equation}
+P[Y=y_{i}|\beta_{0}=\beta_{0}^{*},\beta_{1}=\beta_{1}{*}]=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{y_{i}-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}{\sigma})^{2}}
+\end{equation}
+
+The \emph{Likelihood function} for the whole sample is:
+\begin{equation}
+\mathcal{L}((y_{1},y_{2}, \ldots y_{n})|\beta_{0}=\beta_{0}^{*},\beta_{1}=\beta_{1}^{*})=\prod_{i=1}^{i=n}P[Y=y_{i}|\beta_{0}=\beta_{0}^{*},\beta_{1}=\beta_{1}^{*}]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{y_{1}-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}{\sigma})^{2}}
+\end{equation}
+
+and the \emph{Log Likelihood function} is:
+\begin{equation}
+\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0}=\beta_{0}^{*},\beta_{1}=\beta_{1}^{*})=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}\left( \frac{y_{1}-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}{\sigma} \right) ^{2}
+\end{equation}
+
+Another estimate for $\beta_{0}$ than $\beta_{0}^{*}$ and for $\beta_{1}$ than $\beta_{1}^{*}$ will give another value $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$. In short: the \emph{Log Likelihood function} is a function of $\beta_{0}$ and $\beta_{1}$. The maximum of the \emph{Log Likelihood function} is found from the system of equations that we find by setting the partial derivatives of $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$ with respect to $\beta_{0}$ and $\beta_{1}$ equal to zero:
+% \begin{equation}
+% \begin(cases)
+% \frac{\partial}{\partial \beta_{0}}\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}\left( y_{i}-\beta_{0}-\beta_{1}x_{i} \right)=0 \\
+% \frac{\partial}{\partial \beta_{1}}\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}\left( y_{i}-\beta_{0}-\beta_{1}x_{i} \right)x_{i}=0
+% \end{cases}
+% \end{equation}
+
 
 \newpage
 \textbf{Thanks} \\
