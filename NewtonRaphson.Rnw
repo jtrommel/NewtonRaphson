@@ -587,6 +587,63 @@ The elements of the \emph{gradient vector} are:
 \end{split}
 \end{equation}
 
+The elements of the \emph{Hessian matrix} are:
+\begin{equation}
+\begin{split}
+\frac{\partial^{2}}{\partial \beta_{0}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=-\frac{n}{\sigma^{2}} \\
+\frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})=\frac{\partial^{2}}{\partial \beta_{1} \partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=-\frac{n}{\sigma^{2}}\sum_{i=1}^{i=n}x_{i} \\
+\frac{\partial^{2}}{\partial \beta_{1}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=-\frac{n}{\sigma^{2}}\sum_{i=1}^{i=n}x_{i}^{2}
+\end{split}
+\end{equation}
+
+All we need now to start the iteration are starting values $\beta_{0}^{*}$ and $\beta_{1}^{*}$. A possible start is to use the line going defined by the couples $(x_{min},y(x_{min}))$ and $(x_{max},y(x_{max}))$:
+\begin{equation}
+\frac{y-y(x_{min})}{x-x_{min}}=\frac{y(x_{max})-y(x_{min})}{x_{max}-x_{min}}
+\end{equation}
+
+Setting $\beta_{1}^{*}=\frac{y(x_{max})-y(x_{min})}{x_{max}-x_{min}}$ we find $\beta_{0}^{*}=y(x_{min}-\beta_1)^{*}x_{min}$.
+
+The iteration:
+<<>>=
+# Level beneath which the RMS first derivative is considered to be equal to zero
+level <- 1e-5
+# Initialiseren van beta0 en beta1: echte door gemiddelden en met helling bepaald door de uiterste meetpunten
+dfsorted <- df[order(x),]
+b1star <- (y[n] - y[1])/(x[n] - x[1])
+b0star <- y[1] - b1star*x[1]
+beneath_level <- FALSE
+# We keep a record of the values that b0 and b1 take during the iteration
+beta.reposit <- data.frame(b0=b0star,b1=b1star)
+while(!beneath_level) {
+  grad.ll <- matrix(c((1/sigma^2)*sum(y-b0star-b1star*x),(1/sigma^2)*sum((y-b0star-b1star*x)*x)),nrow=2,ncol=1)
+  Hess.ll <- -(1/sigma^2)*matrix(c(n,sum(x),sum(x),sum(x^2)),nrow=2,ncol=2)
+  # Calculate b0_hat en b1_hat
+  h_hat <- solve(Hess.ll,-grad.ll)
+  b0_hat <- b0star + h_hat[1]
+  b1_hat <- b1star + h_hat[2]
+  # Add new value to the repository of p
+  beta.reposit <- rbind(beta.reposit,c(b0_hat,b1_hat))
+  # Calculate the first derivative and check if it is close enough to zero (beneath the level)
+  grad.ll <- matrix(c((1/sigma^2)*sum(y-b0_hat-b1_hat*x),(1/sigma^2)*sum((y-b0_hat-b1_hat*x)*x)),nrow=2,ncol=1)
+  if (sqrt(grad.ll[1]^2 + grad.ll[2]^2) < level) {
+    beneath_level <- TRUE
+  }
+  # Put the new value of p into p0
+  b0star <- b0_hat
+  b1star <- b1_hat
+}
+paste("The numerical solutions are: b0=",b0star," b1=",b1star)
+# The Ordinary Least Squares solution
+A <- matrix(c(n,sum(x),sum(x),sum(x^2)), nrow=2, ncol=2)
+b <- matrix(c(sum(y),sum(x*y)), nrow=2, ncol=1)
+paste("The result of the linear regression with OLS-method= b0=",solve(A,b)[1]," and b1=",solve(A,b)[2])
+beta.reposit
+@
+\medskip
+We can see that our initial estimate was not bad, and that in one iteration step we numerically found the same result as the \emph{Ordinary Least Squares method}. The values of $b_{0}$ and $b_{1}$ are of course not the same as $\beta_{0}$ and $\beta_{1}$ that we used to create the sample, because this sample is only one of many due to the (normal) error.
+
+
+
 \newpage
 \textbf{Thanks} \\
 \medskip
