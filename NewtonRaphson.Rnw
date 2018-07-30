@@ -462,9 +462,17 @@ The minimum is calculated by taking the partial derivatives of $Q$ with respect 
 \begin{equation}
 \begin{cases}
 nb_{0}+b_{1}\sum_{i=1}^{i=n}x_{i}&=\sum_{i=1}^{i=n}y_{i} \\
-b_{0}\sum_{i=1}^{i=n}x_{i}+b_{1}\sum_{i=1}^{i=n}x_{i}^{2}&=\sum_{i=1}{i=n}x_{i}y_{i}
+b_{0}\sum_{i=1}^{i=n}x_{i}+b_{1}\sum_{i=1}^{i=n}x_{i}^{2}&=\sum_{i=1}^{i=n}x_{i}y_{i}
 \end{cases}
 \label{eq:normaleq}
+\end{equation}
+
+The solutions of the \emph{normal equations} are:
+\begin{equation}
+\begin{split}
+b_{0}&=\bar{y}-b_{1}\bar{x}\\
+b_{1}&=\frac{\sum\limits_{i=1}^{i=n} (x_{i}-\bar{x})(y_{i}-\bar{y})}{\sum\limits_{i=1}^{i=n}(x_{i}-\bar{x})^{2}}
+\end{split}
 \end{equation}
 
 The \emph{Gauss-Markov Theorem} proves that the estimates for $\beta_{0}$ and $\beta_{1}$ obtained by the \emph{Ordinary Least Squares Method} are unbiased and have the smallest variance compared with other estimating methods.
@@ -485,13 +493,99 @@ and the \emph{Log Likelihood function} is:
 \end{equation}
 
 Another estimate for $\beta_{0}$ than $\beta_{0}^{*}$ and for $\beta_{1}$ than $\beta_{1}^{*}$ will give another value $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$. In short: the \emph{Log Likelihood function} is a function of $\beta_{0}$ and $\beta_{1}$. The maximum of the \emph{Log Likelihood function} is found from the system of equations that we find by setting the partial derivatives of $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$ with respect to $\beta_{0}$ and $\beta_{1}$ equal to zero:
-% \begin{equation}
-% \begin(cases)
-% \frac{\partial}{\partial \beta_{0}}\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}\left( y_{i}-\beta_{0}-\beta_{1}x_{i} \right)=0 \\
-% \frac{\partial}{\partial \beta_{1}}\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}\left( y_{i}-\beta_{0}-\beta_{1}x_{i} \right)x_{i}=0
-% \end{cases}
-% \end{equation}
+\begin{equation}
+\begin{cases}
+\frac{\partial}{\partial \beta_{0}}\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}\left( y_{i}-\beta_{0}-\beta_{1}x_{i} \right)=0 \\
+\frac{\partial}{\partial \beta_{1}}\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}\left( y_{i}-\beta_{0}-\beta_{1}x_{i} \right)x_{i}=0
+\end{cases}
+\end{equation}
 
+This is the set of \emph{normal equations} (\ref{eq:normaleq}) that we found using the \emph{Ordinary Least Squares method}. The \emph{Maximum Likelihood method} has an analytical solution, and it is the same as the one found by the \emph{Ordinary Least Squares method}.
+
+We can of course also use the numerical \emph{Newton-Raphson method} to find the maximum. The \emph{Log Likelihood function} is:
+\begin{equation}
+\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}\left( \frac{y_{1}-\beta_{0}-\beta_{1}x_{i}}{\sigma} \right) ^{2}
+\end{equation}
+
+The function is quadratic in $\beta_{0}$ and $\beta_{1}$, so the use of the second order Taylor approximation should give a solution after one iteration.
+
+We start by generating a sample of $n$ observations of the form $y_{i}=\beta_{0}+\beta_{1}x_{i}+u_{i}$ where $U \sim \mathcal{N}(0,\sigma^{2})$ (Figure~\ref{fig:linear}).
+\medskip
+<<label=linear,fig=TRUE,include=FALSE, echo=TRUE>>=
+set.seed(2018)
+# Defining beta0, beta1 and sigma
+beta0 <- 1
+beta1 <- 2
+sigma <- 1
+# Creating the sample
+n <- 10
+x <- seq(1:n)
+y <- beta0 + beta1*x + rnorm(n,0,sigma)
+# Graph of (x,y)
+df <- data.frame(x=x,y=y)
+ggplot(data=df, aes(x=x,y=y)) +
+  geom_point() +
+  labs(title = "Observations",
+       x = "x",
+       y = "y") +
+  JT.theme
+@
+
+\begin{marginfigure}[-3cm]
+\includegraphics[width=1\textwidth]{NR-linear}
+\caption{}
+\label{fig:linear}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+The \emph{Log Likelihood function} as a function of $\beta_{O}$ and $\beta_{1}$ looks like this (Figure~\ref{fig:lllinear})
+\medskip
+<<label=lllinear,fig=TRUE,include=FALSE, echo=TRUE>>=
+# Graph of log likelihood function as a function of betaO and beta1
+k <- 25
+b0 <- seq(beta0-5*abs(beta0),beta0+5*abs(beta0),length.out = k)
+b1 <- seq(-2*beta1,2*beta1,length.out = k)
+ll1 <- matrix(0, nrow=k, ncol=k)
+for(i in (1:k)) {
+  for (j in (1:k)) {
+    ll1[i,j] <- sum(y - b0[i] - b1[j]*x)^2
+  }
+}
+ll <- n*log(1/(sqrt(2*pi)*sigma)) - (1/(2*sigma^2))*ll1
+persp(b0,b1,ll,theta=135,
+      xlim=c(beta0-5.5*abs(beta0),beta0+5.5*abs(beta0)),
+      ylim=c(-2.5*beta1,2.5*beta1),
+      zlim=c(min(ll),10000),
+      xlab="beta0",
+      ylab="beta1",
+      main="log likelihood function",
+      col="lightblue",
+      shade=0.25,
+      ticktype="detailed")
+@
+
+\begin{marginfigure}[-3cm]
+\includegraphics[width=1\textwidth]{NR-lllinear}
+\caption{}
+\label{fig:lllinear}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+\medskip
+To find the maximum of the \emph{Log Likelihood function} we need to calculate the \emph{gradient vector} and the \emph{Hessian matrix} of the function in a chosen point $(\beta_{0}^{*},\beta_{1}^{*})$:
+\begin{equation}
+\begin{split}
+\boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} - \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \\ - \frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \end{bmatrix} \\
+  \textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} \frac{\partial^{2}}{\partial \beta_{0}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \\ \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{1}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \end{bmatrix}
+\end{split}
+\end{equation}
+
+The elements of the \emph{gradient vector} are:
+\begin{equation}
+\begin{split}
+\frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}(y_{i}-\beta_{0}^{*}-\beta_{1}^{*}x_{i}) \\
+\frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}(y_{i}-\beta_{0}^{*}-\beta_{1}^{*}x_{i})x_{i})
+\end{split}
+\end{equation}
 
 \newpage
 \textbf{Thanks} \\
