@@ -440,7 +440,7 @@ RMS = \sqrt{\frac{\partial}{\partial x}f(\hat{x},\hat{y})^{2}+\frac{\partial}{\p
 
 \section{Examples}
 
-\subsection{Example 1: Estimating the co\"effici\"ents of a linear regressio model}
+\subsection{Example 1: Estimating the co\"effici\"ents of a linear regression model}
 
 Choosing a linear regression model means that we assume that the real relation between a response variable $Y$ and an independent variable $X$ has the form:
 \begin{equation}
@@ -636,12 +636,159 @@ paste("The numerical solutions are: b0=",b0star," b1=",b1star)
 # The Ordinary Least Squares solution
 A <- matrix(c(n,sum(x),sum(x),sum(x^2)), nrow=2, ncol=2)
 b <- matrix(c(sum(y),sum(x*y)), nrow=2, ncol=1)
-paste("The result of the linear regression with OLS-method= b0=",solve(A,b)[1]," and b1=",solve(A,b)[2])
+paste("The results of the linear regression with OLS-method are:")
+paste("b0=",solve(A,b)[1]," and b1=",solve(A,b)[2])
 beta.reposit
 @
 \medskip
 We can see that our initial estimate was not bad, and that in one iteration step we numerically found the same result as the \emph{Ordinary Least Squares method}. The values of $b_{0}$ and $b_{1}$ are of course not the same as $\beta_{0}$ and $\beta_{1}$ that we used to create the sample, because this sample is only one of many due to the (normal) error.
 
+\subsection{Example 2: Estimating the co\"effici\"ents of a logistic regression model}
+
+We use logistic regression when the response variable $Y$ takes on only two values like (TRUE, FALSE), (Sick, Healthy)\sidenote{coded as ''1" and ''0"} ... as a function of a continuous independent variable $X$ (or continuous variables $X_{i}$). Graphically we get something like Figure~\ref{fig:scatterlogistic}.
+
+<<label=scatterlogistic,fig=TRUE,include=FALSE, echo=FALSE>>=
+dflogistic <- data.frame(x=c(12, 13, 14, 17, 18, 19, 19, 19, 20, 20.5, 21, 21, 21, 21, 22, 23, 24, 24, 25, 25, 25.5, 26, 27, 27.2), y=c(0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1))
+ggplot(data=dflogistic) + 
+  geom_point(aes(x=x, y=y)) +
+    labs(title="Observations", 
+         xlab="x", 
+         ylab="y: 1=yes, 0=no") +
+  JT.theme
+@
+
+\begin{marginfigure}
+\includegraphics[width=1\textwidth]{NR-scatterlogistic}
+\caption{Plot of a data for logistic regression}
+\label{fig:scatterlogistic}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+We can see that for larger values of $X$ the value of $Y$ tends to be ''1", while for lower values of $X$, $Y$ is predominantly ''0". Because $Y_{i}$ can only take on two values (''0" and ''1") we can look at this situation as a binomial experiment, where the probability that $Y_{i}=1$ is equal to $\pi_{i}$.
+\begin{equation}
+P[Y_{i}=1|X=x_{i}]=\pi_{i}
+\end{equation}
+
+Instead of trying to predict the value of $Y$ for a given value of $X$, the logistic regression predicts the probability $\pi_{i}$. This seems odd, but we should recall that, for example, a linear regression also does not give an exact formula to calculate $Y$ for $X=x_{i}$ but gives a confidence interval for the predicted value. Saying: ''I predict with 95\% confidence that for $X=15$ the value of $Y$ will be in the interval [65.2, 72.8]" is not much different from saying: ''I predict that for $X=7.5$ the probability that $Y=1$ is 76\%".
+
+In Figure~\ref{fig:scatterlogistic} we see that $P[Y_{i}]=\pi_{i}=1$ increases with $x$. A simple model could be a linear relationship:
+\begin{equation}
+\pi_{i}=\beta_{0}+\beta_{1}x_{i}
+\end{equation}
+
+This is really too simple because it can easily lead to values of $\pi_{i}$ that are either negative or greater than 1, which is impossible for a probability. There are other reasons as well why a linear regression is not appropriate. A better relation between $\pi_{i}$ and $x_{i}$ is the \emph{logit function}\sidenote{See Logistic Regression}:
+\begin{equation}
+\pi_{i}=\frac{e^{\beta_0 + \beta_{1}x_{i}}}{1+e^{\beta_0 + \beta_{1}x_{i}}}=\frac{1}{1+e^{-\beta_0 - \beta_{1}x_{i}}}
+\label{eq:logit}
+\end{equation}
+
+The probability that $Y$ takes on the value $y_{i}=1$ or $y_{i}=0$ when $X=x_{i}$ can be written as:
+\begin{equation}
+\begin{split}
+P[Y=y_{i}=1|X=x_{i}]&=\pi_{i} \\
+P[Y=y_{i}=0|X=x_{i}]=1-\pi_{i}
+\end{split}
+\end{equation}
+
+We can write this in one line:
+\begin{equation}
+P[Y=y_{i}|X=x_{i}]=\pi_{i}^{y_{i}}(1-\pi_{i})^{1-y_{i}}
+\end{equation}
+
+because for $y_{i}=1$ it gives $P[Y=y_{i}|X=x_{i}]=\pi_{i}$, and for $y_{i}=0$ it gives $P[Y=y_{i}|X=x_{i}]=(1-\pi_{i})$.
+
+The probability that we get a specific sample of $n$ observations is the \emph{Likelihood function} for this sample:
+\begin{equation}
+\mathcal{L}((y_{1},y_{2}, \ldots y_{n})|(\pi_{1},\pi_{2}, \ldots \pi_{n}))=\prod_{i=1}^{i=n}\pi_{i}^{y_{i}}(1-\pi_{i})^{(1-y_{i})}
+\end{equation}
+
+The \emph{Log Likelihood function} is then:
+\begin{equation}
+\begin{split}
+\ell((y_{1},y_{2}, \ldots y_{n})|(\pi_{1},\pi_{2}, \ldots \pi_{n}))&=ln \left( \mathcal{L}((y_{1},y_{2}, \ldots y_{n})|(\pi_{1},\pi_{2}, \ldots \pi_{n})) \right) \\
+&=\sum_{i=1}^{i=n}y_{i}ln(\pi_{i}) + \sum_{i=1}^{i=n}(1-y_{i})ln ( 1-\pi_{i} ) \\
+&= \sum_{i=1}^{i=n}y_{i} ln \frac{\pi_{i}}{1-\pi{i}} + \sum_{i=1}^{i=n}ln ( 1-\pi_{i} )
+\end{split}
+\end{equation}
+
+When we use the \emph{logit function} to define the relationship between $\pi_{i}$ and $x_{i}$ we get
+\begin{equation}
+\begin{split}
+\pi_{i}&=\frac{e^{\beta_0 + \beta_{1}x_{i}}}{1+e^{\beta_0 + \beta_{1}x_{i}}}\\
+1-\pi{i}&=\frac{1}{1+e^{\beta_0 + \beta_{1}x_{i}}}=\frac{1}{1+e^{\beta_0 + \beta_{1}x_{i}}} \\
+\frac{\pi_{i}}{1-\pi{i}}&=e^{\beta_0 + \beta_{1}x_{i}}
+\end{split}
+\end{equation}
+
+We can write the \emph{Log Likelihood function} as a function of two variables: the parameters $\beta_{0}$ and $\beta_{1}$ of the logistic model:
+\begin{equation}
+\ell(\beta_{0}, \beta_{1})=\sum_{i=1}^{i=n}y_{i}(\beta_{0}+\beta_{1}x_{i}) - \sum_{i=1}^{i=n}ln(1+e^{\beta_{0}+\beta_{1}x_{i}})
+\end{equation}
+
+<<label=lllogistic,fig=TRUE,include=FALSE, echo=TRUE>>=
+# Graph of log likelihood function as a function of betaO and beta1
+x <- dflogistic$x
+y <- dflogistic$y
+k <- 50
+b0 <- seq(-20,0,length.out = k)
+b1 <- seq(-1,1,length.out = k)
+ll <- matrix(0, nrow=k, ncol=k)
+for(i in (1:k)) {
+  for (j in (1:k)) {
+    ll[i,j] <- sum(y*(b0[i]+b1[j]*x)) - sum(log(1+exp(b0[i]+b1[j]*x)))
+  }
+}
+persp(b0,b1,ll,theta=135,
+      xlim=c(-21,1),
+      ylim=c(-1.5,1.5),
+      zlim=c(-500,0),
+      xlab="beta0",
+      ylab="beta1",
+      main="log likelihood function",
+      col="lightblue",
+      shade=0.25,
+      ticktype="detailed")
+@
+
+\begin{marginfigure}[-3cm]
+\includegraphics[width=1\textwidth]{NR-lllogistic}
+\caption{}
+\label{fig:lllogistic}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+\medskip
+Finding the maximum of this function has no analytical solution. So we use the alternative numerical method We find the values of $h_{\beta_{0}}$ and $h_{\beta_{1}}$ that will give us the values of $\beta_{0}=\beta_{0}^{*}+h_{\beta_{0}}$ and $\beta_{1}=\beta_{1}^{*}+h_{\beta_{1}}$ ($\beta_{0}^{*}$ and $\beta_{1}^{*}$ being appropriately chosen starting values) where $\ell(\beta_{0}, \beta_{1})$ reaches a maximum.
+\begin{equation}
+\textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) \boldsymbol{\cdot} \textbf{h} = - \boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*}))
+\end{equation}
+with
+\begin{equation}
+\begin{split}
+\boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} - \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \\ - \frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \end{bmatrix} \\
+  \textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} \frac{\partial^{2}}{\partial \beta_{0}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \\ \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{1}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \end{bmatrix}
+\end{split}
+\end{equation}
+
+The elements of the \emph{gradient vector} are:
+\begin{equation}
+\begin{split}
+\frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=\sum_{i=1}^{i=n}y_{i}- \sum_{i=1}^{i=n} \frac{e^{\beta_{0}^{*}+\beta_{1}^{*}x_{i}}}{1+e^{\beta_{0}^{*}+\beta_{1}^{*}x_{i}}} \\
+&= \sum_{i=1}^{i=n}y_{i}- \sum_{i=1}^{i=n} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{i}}} \\
+\frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})&= \sum_{i=1}^{i=n}y_{i}x_{i}- \sum_{i=1}^{i=n} \frac{e^{\beta_{0}^{*}+\beta_{1}^{*}x_{i}}}{1+e^{\beta_{0}^{*}+\beta_{1}^{*}x_{i}}}x_{i}\\
+&= \sum_{i=1}^{i=n}y_{i}x_{i}- \sum_{i=1}^{i=n} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{i}}}x_{i}
+\end{split}
+\end{equation}
+
+The elements of the \emph{Hessian matrix} are:
+\begin{equation}
+\begin{split}
+\frac{\partial^{2}}{\partial \beta_{0}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=-\sum_{i=1}^{i=n}\frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{\left( 1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}} \right)^{2}} \\
+\frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})=\frac{\partial^{2}}{\partial \beta_{1} \partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=-\sum_{i=1}^{i=n}\frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{\left( 1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}} \right)^{2}}x_{i} \\
+\frac{\partial^{2}}{\partial \beta_{1}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=-\sum_{i=1}^{i=n}\frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{\left( 1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}} \right)^{2}}x_{i}^{2}
+\end{split}
+\end{equation}
+
+There are some very clever ways of using matrices to calculate the elements of the \emph{gradient vector} and the \emph{Hessian matrix}:
 
 
 \newpage
