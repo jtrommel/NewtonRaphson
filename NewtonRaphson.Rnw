@@ -788,8 +788,45 @@ The elements of the \emph{Hessian matrix} are:
 \end{split}
 \end{equation}
 
-There are some very clever ways of using matrices to calculate the elements of the \emph{gradient vector} and the \emph{Hessian matrix}:
+We need starting values $\beta_{0}^{*}$ and $\beta_{1}^{*}$. We could start with the values that come from the linear regression:
 
+<<>>=
+b0star <- summary(lm(y~x))$coefficients[1]
+b1star <- summary(lm(y~x))$coefficients[2]
+@
+
+Setting $\beta_{1}^{*}=\frac{y(x_{max})-y(x_{min})}{x_{max}-x_{min}}$ we find $\beta_{0}^{*}=y(x_{min}-\beta_1)^{*}x_{min}$.
+
+The iteration:
+<<>>=
+# Level beneath which the RMS first derivative is considered to be equal to zero
+level <- 1e-5
+beneath_level <- FALSE
+# We keep a record of the values that b0 and b1 take during the iteration
+beta.reposit <- data.frame(b0=b0star,b1=b1star)
+while(!beneath_level) {
+  grad.ll <- matrix(c(sum(y)-sum(1/(1+exp(-b0star-b1star*x))),sum(y*x)-sum(1/(1+exp(-b0star-b1star*x))*x)),nrow=2,ncol=1)
+  Hess.ll <- -matrix(c(sum(exp(-b0star-b1star*x)/(1+exp(-b0star-b1star*x))^2), sum((exp(-b0star-b1star*x)/(1+exp(-b0star-b1star*x))^2)*x), sum((exp(-b0star-b1star*x)/(1+exp(-b0star-b1star*x))^2)*x), sum((exp(-b0star-b1star*x)/(1+exp(-b0star-b1star*x))^2)*x^2)) ,nrow=2,ncol=2)
+  # Calculate b0_hat en b1_hat
+  h_hat <- solve(Hess.ll,-grad.ll)
+  b0_hat <- b0star + h_hat[1]
+  b1_hat <- b1star + h_hat[2]
+  # Add new value to the repository of p
+  beta.reposit <- rbind(beta.reposit,c(b0_hat,b1_hat))
+  # Calculate the first derivative and check if it is close enough to zero (beneath the level)
+  grad.ll <- matrix(c(sum(y)-sum(1/(1+exp(-b0_hat-b1_hat*x))),sum(y*x)-sum(1/(1+exp(-b0_hat-b1_hat*x))*x)),nrow=2,ncol=1)
+  if (sqrt(grad.ll[1]^2 + grad.ll[2]^2) < level) {
+    beneath_level <- TRUE
+  }
+  # Put the new value of p into p0
+  b0star <- b0_hat
+  b1star <- b1_hat
+}
+paste("The numerical solutions are: b0=",b0star," b1=",b1star)
+paste("The results of the logistic regression with R are:")
+paste("b0=",summary(glm(y~x,binomial))$coefficients[1,1]," and b1=",summary(glm(y~x,binomial))$coefficients[2,1])
+beta.reposit
+@
 
 \newpage
 \textbf{Thanks} \\
