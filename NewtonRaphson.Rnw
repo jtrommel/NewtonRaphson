@@ -828,6 +828,41 @@ paste("b0=",summary(glm(y~x,binomial))$coefficients[1,1]," and b1=",summary(glm(
 beta.reposit
 @
 
+It takes 6 iterations to find the maximum off $\ell(\beta_{0},\beta_{1})$ but the results are the same as what we obtain using the inbuilt logistic regression function in R:
+<<>>=
+summary(glm(y~x,family=binomial))
+@
+
+Some clever use of matrices\sidenote{"Create your Machine Learning library from scratch with R! (1/5) - Linear and logistic regression", Enhance Data Science, \url{http://enhancedatascience.com/2018/01/30/your-own-machine-learning-library-from-scratch-with-r/}} can speed up the calculation.
+
+We create the following matrices:
+\begin{equation}
+\begin{split}
+\boldsymbol{\beta}&= \begin{bmatrix} \beta_{0}^{*} \\ \beta_{1}^{*} \end{bmatrix} \\
+\textbf{x}&= \begin{bmatrix} x_{1} \\ x_{2} \\ \vdots \\ x_{n} \end{bmatrix} \\
+\textbf{X}&= \begin{bmatrix} 1 & x_{1} \\ 1 & x_{2} \\ \vdots & \vdots \\ 1 & x_{n} \end{bmatrix} \\
+\textbf{y}&= \begin{bmatrix} y_{1} \\ y_{2} \\ \vdots \\ y_{n} \end{bmatrix}
+\end{split}
+\end{equation}
+
+then:
+\begin{equation}
+\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T} = \begin{bmatrix} \beta_{0}^{*} + \beta_{1}^{*}x_{1} & \beta_{0}^{*} + \beta_{1}^{*}x_{2} & \hdots & \beta_{0}^{*} + \beta_{1}^{*}x_{n} \end{bmatrix}
+\end{equation}
+
+and
+\begin{equation}
+\textbf{N} = \frac{1}{1+exp(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})} = \begin{bmatrix} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{1}}} & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{2}}} & \hdots & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{n}}} \end{bmatrix}
+\end{equation}
+
+then
+\begin{equation}
+\begin{split}
+\boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \textbf{X}^{T} \boldsymbol{\cdot} \left( \textbf{y} - \textbf{N}^{T} \right) \\
+\textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \textbf{X}^{T} \boldsymbol{\cdot} diag(\textbf{N}^{T}[,1]) \boldsymbol{\cdot} \textbf{X}
+\end{split}
+\end{equation}
+
 \newpage
 \textbf{Thanks} \\
 \medskip
