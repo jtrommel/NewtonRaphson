@@ -574,7 +574,7 @@ persp(b0,b1,ll,theta=135,
 To find the maximum of the \emph{Log Likelihood function} we need to calculate the \emph{gradient vector} and the \emph{Hessian matrix} of the function in a chosen point $(\beta_{0}^{*},\beta_{1}^{*})$:
 \begin{equation}
 \begin{split}
-\boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} - \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \\ - \frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \end{bmatrix} \\
+\boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \\ \frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \end{bmatrix} \\
   \textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} \frac{\partial^{2}}{\partial \beta_{0}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \\ \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{1}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \end{bmatrix}
 \end{split}
 \end{equation}
@@ -765,7 +765,7 @@ Finding the maximum of this function has no analytical solution. So we use the a
 with
 \begin{equation}
 \begin{split}
-\boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} - \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \\ - \frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \end{bmatrix} \\
+\boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \\ \frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})) \end{bmatrix} \\
   \textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \begin{bmatrix} \frac{\partial^{2}}{\partial \beta_{0}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \\ \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}) & \frac{\partial^{2}}{\partial \beta_{1}^{2}}\ell(\beta_{0}^{*},\beta_{1}^{*}) \end{bmatrix}
 \end{split}
 \end{equation}
@@ -853,17 +853,24 @@ then:
 
 and
 \begin{equation}
-\begin{split}
-\textbf{N} &= \frac{1}{1+e^{(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})}} = \begin{bmatrix} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{1}}} & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{2}}} & \hdots & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{n}}} \end{bmatrix} \\
-\textbf{M} &= e^{(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})} \textbf{N}^{2}
-\end{split}
+\textbf{N} = \frac{1}{1+e^{(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})}} = \begin{bmatrix} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{1}}} & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{2}}} & \hdots & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{n}}} \end{bmatrix}
 \end{equation}
 
-then
+From this matrix \textbf{N} we can calculate the, element by element, multiplication
+\begin{equation}
+\textbf{N}\textbf{(1-N)} = \begin{bmatrix} \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{1}})^{2}} & \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{2}})^{2}} & \hdots & \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{n}})^{2}}  \end{bmatrix}
+\end{equation}
+
+With the R-command \textit{diag(z)} we can create the diagnonal matrix:
+\begin{equation}
+diag(z) = \begin{bmatrix} z_{1} & 0 & \hdots & 0 \\ 0 & z_{2} & \hdots & 0 \\ \vdots & \vdots &\hdots &\vdots \\ 0 & 0 & \hdots & z_{n} \end{bmatrix}
+\end{equation}
+
+and this helps us to calculate
 \begin{equation}
 \begin{split}
 \boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \textbf{X}^{T} \boldsymbol{\cdot} \left( \textbf{y} - \textbf{N}^{T} \right) \\
-\textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= - \textbf{X}^{T} \boldsymbol{\cdot} diag(\textbf{M}^{T}[,1]) \boldsymbol{\cdot} \textbf{X}
+\textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= - \textbf{X}^{T} \boldsymbol{\cdot} diag((\textbf{N}\textbf{(1-N)}^{T})^{T}[,1]) \boldsymbol{\cdot} \textbf{X}
 \end{split}
 \end{equation}
 
@@ -884,8 +891,7 @@ beta.reposit <- data.frame(b0=beta.mat[1],b1=beta.mat[2])
 while(!beneath_level) {
   N.mat <- 1/(1+exp(-t(beta.mat) %*% t(X.mat)))
   grad.ll <- t(X.mat) %*% (y.mat - t(N.mat))
-  M.mat <- exp(-t(beta.mat) %*% t(X.mat))*(N.mat^2)
-  Hess.ll <- -t(X.mat) %*% diag(t(M.mat)[,1]) %*% X.mat
+  Hess.ll <- -t(X.mat) %*% diag(t(N.mat*(1 - N.mat))[,1]) %*% X.mat
   # Calculate b0_hat en b1_hat
   hhat.mat <- solve(Hess.ll,-grad.ll)
   bhat.mat <- beta.mat + hhat.mat
@@ -906,7 +912,28 @@ paste("b0=",summary(glm(y~x,binomial))$coefficients[1,1]," and b1=",summary(glm(
 beta.reposit
 @
 
+\chapter{Function in k variables}
+Essentially the method is the same. As an example we use a logistic regression, linear in $k$ variables. The \emph{Log Likelihood function} is then given by:
+\begin{equation}
+\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0}=\beta_{0}^{*},\beta_{1}=\beta_{1}^{*} \ldots \beta_{k}=\beta_{k}^{*})=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}\left( \frac{y_{1}-\beta_{0}^{*}-\beta_{1}^{*}x_{1,i}-\beta_{2}^{*}x_{2,i} \ldots -\beta_{k}^{*}x_{k,i}}{\sigma} \right) ^{2}
+\end{equation}
 
+You pick $k$ starting variables $\boldsymbol{\beta}=[\beta_{0}^{*},\beta_{1}^{*}, \ldots, \beta_{k-1}^{*}]$ and then solve
+\begin{equation}
+\textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*}, \ldots, \beta_{k-1}^{*})) \boldsymbol{\cdot} \textbf{h} = - \boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*}, \ldots, \beta_{k-1}^{*}))
+\end{equation}
+for $\textbf{h}$
+
+where
+\begin{equation}
+\begin{split}
+\boldsymbol{\nabla}(\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*})) &= \begin{bmatrix} \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*}, \ldots \beta_{k}^{*}) \\ \frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*}, \ldots \beta_{k}^{*}) \\ \vdots \ \frac{\partial}{\partial \beta_{k}}\ell(\beta_{0}^{*},\beta_{1}^{*}, \ldots, \beta_{k}^{*}) \end{bmatrix} \\
+\textbf{Hess}(\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*})) &= \begin{bmatrix} \frac{\partial^{2}}{\partial \beta_{0}^{2}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) & \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{1}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) & \ldots & \frac{\partial^{2}}{\partial \beta_{0} \partial \beta_{k}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) \\ \frac{\partial^{2}}{\partial \beta_{1} \partial \beta_{0}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) & \frac{\partial^{2}}{\partial \beta_{1}^{2}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) & \ldots & \frac{\partial^{2}}{\partial \beta_{1} \partial \beta_{k}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) \\ \vdots & \vdots & \hdots & \vdots \\ \frac{\partial^{2}}{\partial \beta_{k} \partial \beta_{0}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) & \frac{\partial^{2}}{\partial \beta_{k} \partial \beta_{1}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) & \ldots & \frac{\partial^{2}}{\partial \beta_{k}^{2}}\ell(\beta_{0}^{*}, \beta_{1}^{*}, \ldots \beta_{k}^{*}) \end{bmatrix}
+\end{split}
+\end{equation}
+\medskip
+
+The next iteration is done with the new values of $\boldsymbol{\beta}_{new}=\boldsymbol{\beta}_{old} + \textbf{h}$. All this work is done in R with the \textit{glm-function}.
 
 \newpage
 \textbf{Thanks} \\
