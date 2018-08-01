@@ -649,6 +649,7 @@ We use logistic regression when the response variable $Y$ takes on only two valu
 
 <<label=scatterlogistic,fig=TRUE,include=FALSE, echo=FALSE>>=
 dflogistic <- data.frame(x=c(12, 13, 14, 17, 18, 19, 19, 19, 20, 20.5, 21, 21, 21, 21, 22, 23, 24, 24, 25, 25, 25.5, 26, 27, 27.2), y=c(0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1))
+n <- nrow(dflogistic)
 ggplot(data=dflogistic) + 
   geom_point(aes(x=x, y=y)) +
     labs(title="Observations", 
@@ -852,16 +853,60 @@ then:
 
 and
 \begin{equation}
-\textbf{N} = \frac{1}{1+exp(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})} = \begin{bmatrix} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{1}}} & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{2}}} & \hdots & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{n}}} \end{bmatrix}
+\begin{split}
+\textbf{N} &= \frac{1}{1+e^{(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})}} = \begin{bmatrix} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{1}}} & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{2}}} & \hdots & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{n}}} \end{bmatrix} \\
+\textbf{M} &= e^{(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})} \textbf{N}^{2}
+\end{split}
 \end{equation}
 
 then
 \begin{equation}
 \begin{split}
 \boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \textbf{X}^{T} \boldsymbol{\cdot} \left( \textbf{y} - \textbf{N}^{T} \right) \\
-\textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= \textbf{X}^{T} \boldsymbol{\cdot} diag(\textbf{N}^{T}[,1]) \boldsymbol{\cdot} \textbf{X}
+\textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) &= - \textbf{X}^{T} \boldsymbol{\cdot} diag(\textbf{M}^{T}[,1]) \boldsymbol{\cdot} \textbf{X}
 \end{split}
 \end{equation}
+
+The iteration reworked with matrices
+<<>>=
+# Defining the matrices
+# beta with starting values derived from simple linear regression
+beta.mat <- matrix(c(summary(lm(y~x))$coefficients[1],summary(lm(y~x))$coefficients[2]), nrow=2, ncol=1)
+# other matrices
+x.mat <- as.matrix(x)
+X.mat <- matrix(c(rep(1,n),x), nrow=n, ncol=2)
+y.mat <- as.matrix(y)
+# Level beneath which the RMS first derivative is considered to be equal to zero
+level <- 1e-5
+beneath_level <- FALSE
+# We keep a record of the values that b0 and b1 take during the iteration
+beta.reposit <- data.frame(b0=beta.mat[1],b1=beta.mat[2])
+while(!beneath_level) {
+  N.mat <- 1/(1+exp(-t(beta.mat) %*% t(X.mat)))
+  grad.ll <- t(X.mat) %*% (y.mat - t(N.mat))
+  M.mat <- exp(-t(beta.mat) %*% t(X.mat))*(N.mat^2)
+  Hess.ll <- -t(X.mat) %*% diag(t(M.mat)[,1]) %*% X.mat
+  # Calculate b0_hat en b1_hat
+  hhat.mat <- solve(Hess.ll,-grad.ll)
+  bhat.mat <- beta.mat + hhat.mat
+  # Add new value to the repository of p
+  beta.reposit <- rbind(beta.reposit,c(bhat.mat[1],bhat.mat[2]))
+  # Calculate the first derivative and check if it is close enough to zero (beneath the level)
+  N.mat <- 1/(1+exp(-t(bhat.mat) %*% t(X.mat)))
+  grad.ll <- t(X.mat) %*% (y.mat - t(N.mat))
+  if (sqrt(grad.ll[1]^2 + grad.ll[2]^2) < level) {
+    beneath_level <- TRUE
+  }
+  # Put the new value of beta into beta.mat
+  beta.mat <- bhat.mat
+}
+paste("The numerical solutions are: b0=",beta.mat[1]," b1=",beta.mat[2])
+paste("The results of the logistic regression with R are:")
+paste("b0=",summary(glm(y~x,binomial))$coefficients[1,1]," and b1=",summary(glm(y~x,binomial))$coefficients[2,1])
+beta.reposit
+@
+
+
 
 \newpage
 \textbf{Thanks} \\
