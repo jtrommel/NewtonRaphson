@@ -85,7 +85,7 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 % Functions
 
 \frontmatter
-\chapter*{Newton-Raphson method for finding the maximum of a function}
+\chapter*{Finding the maximum of the (log) likelihood function with the Newton-Raphson method}
 
 \mainmatter
 \chapter{Function of one variable}
@@ -94,14 +94,14 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 Taylor's Theorem says that if a function $f(x)$ is $(k+1)$ times differentiable on an open interval I, than for any two points $x$ and $x+h$ in I there exists a point $w$ between $x$ and $x+h$ such that:
 \begin{equation}
 f(x+h)=f(x) + f'(x)h + \frac{1}{2}f''(x)h^{2}+ \ldots + \frac{1}{k!}f^{k}(x)h^{k} + \frac{1}{(k+1)!}f^{k+1}(w)h^{k+1}
-\label{Taylor1v}
+\label{eq:Taylor1v}
 \end{equation}
 
-For small values of $h$ (in the limit when $h$ goes to $0$) the higher order terms in \ref{eq:Taylor1v} go to $0$ much faster than $h$ itself. In that case (small values of $h$) we can approximate the function, keeping only a restricted number of terms. The first and second order Taylor approximations are
+For small values of $h$ (in the limit for $h$ going to $0$) the higher order terms in \ref{eq:Taylor1v} go to $0$ much faster than $h$ itself. In that case we can approximate the function by keeping only a restricted number of terms. The first and second order Taylor approximations are
 \begin{equation}
   \begin{split}
-  f(x) &\approx f(x+h) + f'(x)h \\
-  f(x) &\approx f(x=h) + f'(x)h + \frac{1}{2}f''(x)h^{2}
+  f(x+h) &\approx f(x) + f'(x)h \\
+  f(x+h) &\approx f(x) + f'(x)h + \frac{1}{2}f''(x)h^{2}
   \end{split}
 \end{equation}
 
@@ -114,14 +114,14 @@ A function $f(x)$ reaches a (local) maximum for $x=\hat{x}$ when
   \end{split}
 \end{equation}
 
-Suppose that $\hat{x}$, where $f(x)$ reaches a maximum, lies close to point $x=x_{0}$. Then we can use the second order Taylor approximation in the neighbourhood of $x_{0}$:
+Suppose that $\hat{x}$, where $f(x)$ reaches a maximum, lies close to point $x=x_{0}$. Then we can use the second order Taylor approximation in the neighbourhood of $x_{0}$.
 \begin{equation}
 f(x_{0}+h) \approx f(x_{0}) + f'(x_0)h + \frac{1}{2}f''(x_{0})h^{2}
 \end{equation}
 
-The value $\hat{h}$ for which $\hat{x}=x_{0}+\hat{h}$ can then be found from
+This equation in $h$ has a maximum for $h=\hat{h}$ where $x=\hat{x}=x_{0}+\hat{h}$. This maximum can be found from
 \begin{equation}
-\frac{d}{dh}f(x_{0}+\hat(h)=f'(x_{0})+f''(x_{0})\hat{h}=0
+\frac{d}{dh}f(x_{0}+\hat{h})=f'(x_{0})+f''(x_{0})\hat{h}=0
 \end{equation}
 
 or
@@ -130,19 +130,19 @@ or
 \label{eq:hat_h}
 \end{equation}
 
-This will not insure that $\hat{x}=x_{0}+\hat{h}$ will be where $f(x)$ reaches its maximum. This is because the second order Taylor approximation is just that: an approximation, and because it is only valid for small values of $h$. An iterative process is needed that gradually gets us to a value of $\hat{x}$ where the value of $f'(\hat{x})$ is close enough to zero. What ''close enough" is, is our own choice.
+This does not insure that $f(x)$ reaches its maximum for $x=\hat{x}=x_{0}+\hat{h}$. This is because the second order Taylor approximation is just that, an approximation, and only valid for small values of $h$. An iterative process is needed that gradually gets us to a value of $\hat{x}$ where the value of $f'(\hat{x})$ is close enough to zero. What ''close enough" is, is a treshold that we have to define.
 
 \section{Examples}
 
-The examples are taken from the topic of the Likelihood Function in statistics. There are different methods for estimating model parameters of a distribution. One of these methods uses the Likelihood Function (or its logaritm). Sometimes an analytical solution is possible, but sometimes we have to use a numerical technique such as the Newton-Raphson method.
+The examples are taken from the topic of the \emph{method of Maximum Likelihood} in statistics. There are different methods for estimating model parameters of a distribution and one of these methods uses the Likelihood Function (or its logaritm). Sometimes an analytical solution is possible, but in other cases we have to use a numerical technique such as the Newton-Raphson method.
 
-\subsection{Example 1: Estimating the mean $\mu$ of a normal distribution with known variance $\sigma^{2}$}
+\subsection{Example 1: Estimating the mean $\mu$ of a normal distribution with known a variance $\sigma^{2}$}
 
 This is a classic starting point for estimating parameters in statistics textbooks.
 
 \newthought{We can find an unbiased estimator as follows}:
 \newline
-We have $X \sim \mathcal{N}(\mu,\,\sigma^{2})$. We take a sample $(x_{1}, x_{2}, \ldots x_{n})$ of size $n$ from this distribution. Then we know that $X_{1} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $X_{2} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $\ldots$ $X_{n} \sim \mathcal{N}(\mu,\,\sigma^{2})$. This means that the derived chance variable $\bar{X}=\frac{1}{n}(X_{1}+X_{2} + \ldots + X_{n})$ will be $\bar{X} \sim \mathcal{N}(\mu,\,\frac{\sigma^{2}}{n})$. Therefore $\bar{x}= \frac{1}{n}(x_{1}+x_{2} + \ldots + x_{n})$ will be an unbiased estimater of $\mu$.
+We have $X \sim \mathcal{N}(\mu,\,\sigma^{2})$, with $\sigma^{2}$ known. We take a sample $(x_{1}, x_{2}, \ldots x_{n})$ of size $n$ from this distribution. Then we know that $X_{1} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $X_{2} \sim \mathcal{N}(\mu,\,\sigma^{2})$, $\ldots$ $X_{n} \sim \mathcal{N}(\mu,\,\sigma^{2})$. This means that the sample distribution of the derived chance variable $\bar{X}=\frac{1}{n}(X_{1}+X_{2} + \ldots + X_{n})$ will be $\bar{X} \sim \mathcal{N}(\mu,\,\frac{\sigma^{2}}{n})$. Therefore $\bar{x}= \frac{1}{n}(x_{1}+x_{2} + \ldots + x_{n})$ will be an unbiased estimater of $\mu$ because $E(\bar{X})=E(X)=\mu$
 \begin{equation}
 estimate(\mu)=\bar{x}=\frac{\sum_{i=1}^{i=n}x_{i}}{n}
 \label{eq:estimate_xbar}
@@ -153,14 +153,57 @@ estimate(\mu)=\bar{x}=\frac{\sum_{i=1}^{i=n}x_{i}}{n}
 P[X=x_{1}|\mu=\mu_{1}]=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{1}-\mu_{1}}{\sigma})^{2}}
 \end{equation}
 
-For all the other observations in the sample we can calculate their probability. Assuming that all observations are independent, the total probability of having this specific sample with this particular estimate of $\mu=\mu_{1}$, will be equal to the product of all the individual probabilities. We call this the Likelihood of this sample:
+If our estimate $\mu_{1}$ is very different from $\mu$, this probability will be very low (Figure~\ref{fig:likelihooddemo}). With a better estimate $\mu_{2}$ the probability will be higher.
+<<label=likelihooddemo,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018)
+demo <- data.frame(t=seq(50,150,length.out = 100),y=0, y1=0, y2=0)
+# setting the distribution parameters
+mu <- 100
+sigma <- 10
+mu1 <- 70
+mu2 <- 105
+demo$y <- dnorm(demo$t, mu, sigma)
+demo$y1 <- dnorm(demo$t, mu1, sigma)
+demo$y2 <- dnorm(demo$t, mu2, sigma)
+sample_x <- 95
+ggplot() +
+  geom_line(data=demo, aes(x=t, y=y), color="Black", linetype=2) +
+  geom_line(data=demo, aes(x=t, y=y1), color="Blue", linetype=1) +
+  geom_line(data=demo, aes(x=t, y=y2), color="Red", linetype=1) +
+  geom_point(aes(x=sample_x, y=0), color="Black") +
+  geom_point(aes(x=sample_x, y=dnorm(sample_x, mu1, sigma)), color="Blue") +
+  geom_point(aes(x=sample_x, y=dnorm(sample_x, mu2, sigma)), color="Red") +
+  geom_line(aes(x=c(sample_x, sample_x), y=c(0,dnorm(sample_x, mu1, sigma))),colour="Blue") +
+  geom_line(aes(x=c(sample_x, sample_x), y=c(0,dnorm(sample_x, mu2, sigma))),colour="Red") +
+  annotate("text", x=sample_x, y=0.003, colour="Blue", label="low probability") +
+  annotate("text", x=sample_x, y=0.025, colour="Red", label="high probability") +
+  geom_line(aes(x=c(mu1, mu1), y=c(0,dnorm(mu1, mu1, sigma))), color="Blue", linetype=3) +
+  annotate("text", x=mu1, y=0.01, label="poor", colour="Blue") +
+  annotate("text", x=mu1, y=0.008, label="estimate", colour="Blue") +
+  geom_line(aes(x=c(mu2, mu2), y=c(0,dnorm(mu2, mu2, sigma))), color="Red", linetype=3) +
+  annotate("text", x=mu2, y=0.01, label="better", colour="Red") +
+  annotate("text", x=mu2, y=0.008, label="estimate", colour="Red") +
+  labs(title = "Unknown distribution N(100,10) and esti-\nmated distributions N(70,10) and N(95,10)",
+       x = "x",
+       y = "probability density function") +
+  JT.theme
+@
+
+\begin{marginfigure}
+\includegraphics[width=1\textwidth]{NR-likelihooddemo}
+\caption{}
+\label{fig:likelihooddemo}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+For all the other observations in the sample we can calculate their probability in the same way. Assuming that all observations are independent, the total probability of having this specific sample with this particular estimate of $\mu=\mu_{1}$, will be equal to the product of all the individual probabili\-ties. We call this the Likelihood of the sample:
 \begin{equation}
-\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu=\mu_{1})=\prod_{i=1}^{i=n}P[X=x_{i}|\mu=\mu_{1}]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{i}-\mu_{1}}{\sigma})^{2}}
+\mathcal{L}((x_{1},x_{2}, \ldots x_{n})|\mu=\mu_{1})=\prod_{i=1}^{i=n}P[X=x_{i}|\mu=\mu_{1}]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{i}-\mu_{1}}{\sigma})^{2}}
 \end{equation}
 
-For a different estimate $\mu=\mu_{2}$ we will get a different value for the Likelihood of the sample. In general: the Likelihood of the sample is a function of $\mu$:
+With the different estimate $\mu=\mu_{2}$ we will get a different value for the Likelihood of the sample. In general: the Likelihood of the sample is a function of our estimate of $\mu$:
 \begin{equation}
-\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu)=\prod_{i=1}^{i=n}P[X=x_{i}|\mu]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{i}-\mu}{\sigma})^{2}}
+\mathcal{L}((x_{1},x_{2}, \ldots x_{n})|\mu)=\prod_{i=1}^{i=n}P[X=x_{i}|\mu]=\prod_{i=1}^{i=n}\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}(\frac{x_{i}-\mu}{\sigma})^{2}}
 \end{equation}
 
 Instead of working with the \emph{Likelihood function}, it is easier to work with the (natural) logarithm of this function, the \emph{Log Likelihood function}:
@@ -168,9 +211,9 @@ Instead of working with the \emph{Likelihood function}, it is easier to work wit
 \ell((x_{1},x_{2}, \ldots x_{n})|\mu)=ln(\mathcal{L}(x_{1},x_{2}, \ldots x_{n})|\mu))=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}\left( \frac{x_{i}-\mu}{\sigma} \right) ^{2}
 \end{equation}
 
-Both functions have a maximum for the same value of $\mu=\hat{\mu}$. We find $\hat{\mu}$ from
+The \emph{Likelihood function} and the \emph{Log Likelihood function} have their maximum for the same value of $\mu=\hat{\mu}$. We find $\hat{\mu}$ from
 \begin{equation}
-\frac{d}{d\mu}\ell((x_{1},x_{2}, \ldots x_{n})|\hat{\mu})= \sum_{i=1}^{i=n}\frac{x_{i}-\hat{\mu}}{\sigma}=0
+\frac{d}{d\mu}\ell((x_{1},x_{2}, \ldots x_{n})|\hat{\mu})= \sum_{i=1}^{i=n}\frac{x_{i}-\hat{\mu}}{\sigma^{2}}=0
 \end{equation}
 or
 \begin{equation}
