@@ -134,7 +134,7 @@ This does not insure that $f(x)$ reaches its maximum for $x=\hat{x}=x_{0}+\hat{h
 
 \section{Examples}
 
-The examples are taken from the topic of the \emph{method of Maximum Likelihood} in statistics. There are different methods for estimating model parameters of a distribution and one of these methods uses the Likelihood Function (or its logaritm). Sometimes an analytical solution is possible, but in other cases we have to use a numerical technique such as the Newton-Raphson method.
+The examples are taken from the topic of the \emph{method of Maximum Likelihood} in statistics. There are different methods for estimating model parameters of a distribution and one of these methods uses the Likelihood Function (or its logarithm). Sometimes an analytical solution is possible, but in other cases we have to use a numerical technique such as the Newton-Raphson method.
 
 \subsection{Example 1: Estimating the mean $\mu$ of a normal distribution with known a variance $\sigma^{2}$}
 
@@ -220,7 +220,7 @@ or
 \hat{\mu}=\frac{\sum_{i=1}^{i=n}x_{i}}{n}=\bar{x}
 \end{equation}
 
-In this case the Method of Maximum Likelihood leads to an equation that can be solved analytically and it gives the same result as in equation \ref{eq:estimate_xbar}.
+In this case the Method of Maximum Likelihood gives us an equation that can be solved analytically and it has the same result as in equation \ref{eq:estimate_xbar}.
 
 \newthought{Finding the maximum of the Log Likelihood function} is not always possible in an analytical way. Then we have to use a numerical method such as Newton-Raphson. For a numerical solution we need to have a specific situation. Suppose we take a sample of size 10 from a normal distribution with $\mu=100$ and $\sigma=10$:
 <<>>=
@@ -230,14 +230,14 @@ mu <- 100
 sigma <- 10
 x <- rnorm(n,mu,sigma)
 @
-Then we calculate the Log Likelihood function for 100 values of $\mu$ ranging from $\mu-2\sigma$ to $\mu+2\sigma$ and make a plot of the Log Likelihood function:
+Then we calculate the Log Likelihood function for 100 values of $\mu$ ranging from $\mu-2\sigma$ to $\mu+2\sigma$ and make a plot this function (Figure~\ref{fig:llnorm}).
 <<label=llnorm,fig=TRUE,include=FALSE, echo=TRUE>>=
 # ll = Log Likelihood function of mu
 ll <- data.frame(mu=seq(mu-2*sigma,mu+2*sigma,length.out = 100),log.likelihood=0)
 for (i in 1:nrow(ll)) {
   ll$log.likelihood[i] <- - (1/(2*sigma^2))*sum((x-ll$mu[i])^2)
 }
-ll$log.likelihood <- ll$log.likelihood - n*log(sqrt(2*pi)*sigma)
+ll$log.likelihood <- ll$log.likelihood + n*log(sqrt(2*pi)*sigma)
 ggplot(data=ll, aes(x=mu,y=log.likelihood)) +
   geom_line() +
   labs(title = "Log Likelihood of sample (size=10) from N(100,10)",
@@ -253,7 +253,7 @@ ggplot(data=ll, aes(x=mu,y=log.likelihood)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
-The iteration starts from a value $\mu_{0}$. From there we calculate $\hat{h}$ so that the maximum will be found at $\hat{\mu}=\mu_{0}+\hat{h}$. Intu\"{i}tively, most people would choose $\mu_{0}=\bar{x}$ (and they would be spot on from the first try!). Let us be naive and pick $\mu_{0}=min(x_{i})$. Equation \ref{eq:hat_h} gives us the value of $\hat{h}$ based on the first and second derivative of $\ell(\mu)$. The Log Likelihood function, its 1st and 2nd derivative in this case are:
+The Newton-Raphson method starts with a value $\mu_{0}$. From there we calculate $\hat{h}$ so that the maximum will be found at $\hat{\mu}=\mu_{0}+\hat{h}$. Intuitively, most people would choose $\mu_{0}=\bar{x}$ (and they would be spot on from the first try!). Let us be naive and pick $\mu_{0}=min(x_{i})$. Equation \ref{eq:hat_h} gives us the value of $\hat{h}$ based on the first and second derivative of $\ell(\mu)$. The Log Likelihood function, its 1st and 2nd derivative in this case are:
 \begin{equation}
 \begin{split}
 \ell((x_{1},x_{2}, \ldots x_{n})|\mu)&=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) - \sum_{i=1}^{i=n} \frac{1}{2}\left( \frac{x_{i}-\mu}{\sigma} \right) ^{2} \\
@@ -262,7 +262,7 @@ The iteration starts from a value $\mu_{0}$. From there we calculate $\hat{h}$ s
 \end{split}
 \end{equation}
 
-We can see that the second derivative is constant and negative. This means that the extremum will be a maximum (as we can see from Figure~\ref{fig:llnorm}). We will check is the first derivative is zero for $\hat{\mu}$. It probably will not be exactly zero so we have to set a level under which the iteration will be stopped.
+We can see that the second derivative is constant and negative. This means that the extremum will be a maximum (as we can see from Figure~\ref{fig:llnorm}). We will check if the first derivative is zero for $\hat{\mu}$. It probably will not be exactly zero so we have to set a level under which the iteration will be stopped.
 <<>>=
 #
 # Numerical solution with 2nd order Tayler approximation of the log likelihood function
@@ -299,11 +299,11 @@ As we can see, the numerical iteration needed only one step to find the exact so
 \begin{equation}
 \ell((x_{1},x_{2}, \ldots x_{n})|\mu)=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) - \sum_{i=1}^{i=n} \frac{1}{2}\left( \frac{x_{i}-\mu}{\sigma} \right) ^{2}
 \end{equation}
-This is a quadratic equation in $\mu$, which means that its second order Taylor approximation won't be an approximation, but will be exactly equal to the function.
+This is a quadratic equation in $\mu$, which means that its second order Taylor approximation is exactly equal to the function itself.
 
 \subsection{Example 2: Estimating the probability $\pi$ of a binomial experiment}
 
-When we do an binomial experiment we do $n$ tries where each try can only have two outcomes: ''success" of "failure". Let $X$ be the chance variable that is equal to the number of successes, than this number will depend on the probability of success $\pi$ in each try. $X$ has a Binomial distribution $X \sim \mathcal{B}(\pi)$ and the probability that $X=k$ is given by:
+When we do an binomial experiment we have $n$ tries where each try can only have two outcomes: ''success" of "failure". Let $X$ be the chance variable that is equal to the number of successes, than this number will depend on the probability of success $\pi$ on each try. $X$ has a Binomial distribution $X \sim \mathcal{B}(\pi)$ and the probability that $X=k$ is given by:
 \begin{equation}
 P[X=k|\pi]={n \choose k}\pi^{k}(1-\pi)^{(n-k)}
 \end{equation}
@@ -315,7 +315,7 @@ The Likelihood for obtaining a ''0" in the first experiment is:
 P[x_{1}=0|\pi]=(1-\pi)
 \end{equation}
 
-The Likelihood for obtaining all the registred results is:
+The Likelihood for obtaining each of the registred results is:
 \begin{equation}
 \begin{split}
 P[x_{1}&=0|\pi]=(1-\pi) \\
@@ -331,9 +331,9 @@ P[x_{10}&=1|\pi]=\pi
 \end{split}
 \end{equation}
 
-The Likelihood for this result is the product of the probabilities per try:
+The Likelihood for this specific series of results is the product of the probabilities on each try:
 \begin{equation}
-\mathcal{L}(x_{1},x_{2}, \ldots x_{10})|\pi)=\mathcal{L}(X=k|\pi)=\prod_{i=1}^{i=10}P[x_{i}|\pi]=\pi^{8}(1-\pi)^{2}=\pi^{k}(1-\pi)^{n-k}
+\mathcal{L}((x_{1},x_{2}, \ldots x_{10})|\pi)=\mathcal{L}(X=k|\pi)=\prod_{i=1}^{i=10}P[x_{i}|\pi]=\pi^{8}(1-\pi)^{2}=\pi^{k}(1-\pi)^{n-k}
 \end{equation}
 
 The Log Likelihood function is:
@@ -364,7 +364,7 @@ ggplot(data=ll, aes(x=p,y=log.likelihood)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
-The Log Likelihood function, its first and second derivatives are:
+The Log Likelihood function and the first and second derivatives are:
 \begin{equation}
 \begin{split}
 \ell(k|\pi) &=k.ln(\pi) + (n-k).ln(1-\pi) \\
@@ -412,7 +412,7 @@ We find the correct result, but the iteration takes much longer because the Tayl
 
 \chapter{Function of two variables}
 \section{Taylor approximation}
-Taylor's Theorem says that if a function $f(x,y)$ is at least two times differentiable on an open interval I, than for any two points $(x,y)$ and $(x+h_{x}, y+h_{y}$ ($h_{x}$ and $h_{y}$ small) the second order Taylor approximation is given by:
+Taylor's Theorem says that if a function $f(x,y)$ is at least two times differentiable on an open interval I, than for any two points $(x,y)$ and $(x+h_{x}, y+h_{y})$ ($h_{x}$ and $h_{y}$ small) the second order Taylor approximation is given by:
 
 \begin{equation}
 f(x+h_{x},y+h_{y}) \approx f(x,y) + \frac{\partial}{\partial x}f(x,y).h_{x} + \frac{\partial}{\partial y}f(x,y).h_{y} +\frac{1}{2}\frac{\partial^{2}}{\partial x^{2}}f(x,y).h_{x}^{2} + \frac{\partial^{2}}{\partial x \partial y}f(x,y).h_{x}.h_{y} +\frac{1}{2}\frac{\partial^{2}}{\partial y^{2}}f(x,y).h_{y}^{2}
@@ -428,7 +428,7 @@ A function $f(x,y)$ reaches a (local) maximum for $(x=\hat{x},y=\hat{y}$ when
 \end{cases}
 \end{equation}
 
-Suppose that $\hat{x}, \hat{y}$, where $f(x,y)$ reaches a maximum, lies close to point $x=x_{0},y=y_{0}$. Then we can use the second order Taylor approximation in the neighbourhood of $x_{0}$:
+Suppose that ($\hat{x}, \hat{y}$) are the values of $x$ and $y$ where $f(x,y)$ reaches a maximum. If ($\hat{x}, \hat{y}$) is close to ($x_{0},y_{0}$), then we can use the second order Taylor approximation in the neighbourhood of ($x_{0},y_{0}$):
 \begin{equation}
 \begin{split}
 f(x_{0}+h_{x},y_{0}+h_{y}) \approx f(x_{0},y_{0}) & + \frac{\partial}{\partial x}f(x_{0},y_{0}).h_{x} + \frac{\partial}{\partial y}f(x_{0},y_{0}).h_{y}\\
@@ -466,42 +466,42 @@ the \emph{Hessian} matrix of $f(x,y)$ in $(x_{0},y_{0})$
 
 and
 \begin{equation}
-  \textbf{b}= \begin{bmatrix} - \frac{\partial}{\partial x}f(x_{0},y_{0}) \\ - \frac{\partial}{\partial y}f(x_{0},y_{0}) \end{bmatrix} = \boldsymbol{\nabla}(f(x_{0},y_{0}))
+  \textbf{b}= \begin{bmatrix} - \frac{\partial}{\partial x}f(x_{0},y_{0}) \\ - \frac{\partial}{\partial y}f(x_{0},y_{0}) \end{bmatrix} = - \boldsymbol{\nabla}(f(x_{0},y_{0}))
 \end{equation}
-the \emph{gradient} vector of $f(x,y)$ in $(x_{0},y_{0})$
+with $\boldsymbol{\nabla}(f(x_{0},y_{0}))$ \emph{gradient} vector of $f(x,y)$ in $(x_{0},y_{0})$
 
 and
 \begin{equation}
   \textbf{h}= \begin{bmatrix} h_{x} \\ h_{y} \end{bmatrix}
 \end{equation}
-the vector of the values we are calculating.
+the vector of the values we are trying to find.
 
-Again, this will not insure that $(\hat{x}=x_{0}+\hat{h_{x}},\hat{y}=y_{0}+\hat{h_{y}}$ will be where $f(x,y)$ reaches its maximum. The second order Taylor approximation remains an approximation, and is only valid for small values of $(h_{x},h_{y})$. Using an iterative process we can find out if $\frac{\partial}{\partial x}f(\hat{x},\hat{y}) and \frac{\partial}{\partial y}f(\hat{x},\hat{y})$ are close enough to zero. We will use the RMS value to test this condition with
+Again, this will not insure that $(\hat{x}=x_{0}+\hat{h_{x}},\hat{y}=y_{0}+\hat{h_{y}})$ will be where $f(x,y)$ reaches its maximum. The second order Taylor approximation remains an approximation, and is only valid for small values of $(h_{x},h_{y})$. In the iterative process we will check if $\frac{\partial}{\partial x}f(\hat{x},\hat{y}) and \frac{\partial}{\partial y}f(\hat{x},\hat{y})$ are close enough to zero. We will use the RMS value to test this condition:
 \begin{equation}
 RMS = \sqrt{\frac{\partial}{\partial x}f(\hat{x},\hat{y})^{2}+\frac{\partial}{\partial y}f(\hat{x},\hat{y})^{2}}
 \end{equation}
 
 \section{Examples}
 
-\subsection{Example 1: Estimating the co\"effici\"ents of a linear regression model}
+\subsection{Example 1: Estimating the coefficients of a linear regression model}
 
 Choosing a linear regression model means that we assume that the real relation between a response variable $Y$ and an independent variable $X$ has the form:
 \begin{equation}
 Y = \beta_{0}+\beta_{1}X
 \end{equation}
 
-However, when we take $n$ measurements of couples $(x_{i},y_{i})$ these, in general, do not lie on a straigth line. This is considered to be caused by other unknown or uncontrollable variables. However we assume that the net effect of these disturbances is normally distributed $U \sim \mathcal{N}(0,\sigma^{2})$, and that the value of $\sigma$ is independent of $X$\sidenote{LineaireRegressie.pdf}.
+However, when we take $n$ measurements of couples $(x_{i},y_{i})$ these, in general, do not lie on a straigth line. This is considered to be caused by other unknown or uncontrollable variables. However we assume that the net effect of these disturbances is normally distributed $U \sim \mathcal{N}(0,\sigma^{2})$, and that the value of $\sigma$ is independent of $X$\sidenote{LineaireRegressie.pdf}:
 \begin{equation}
 Y_{i}=\beta_{0}+\beta_{1}X_{i}+U_{i}
 \end{equation}
-Because $\beta_{0}$, $\beta_{1}$ and $X_{i}$ are constants or known values this implies that $Y_{i}$ is normally distributed: $Y_{i} \sim \mathcal{N}(\beta_{0}+\beta_{1}X_{i},\sigma^{2})$
+Because $\beta_{0}$, $\beta_{1}$ are constants and $X_{i}$ are known values this implies that $Y_{i}$ is normally distributed: $Y_{i} \sim \mathcal{N}(\beta_{0}+\beta_{1}X_{i},\sigma^{2})$
 
 \newthought{The classical method} to estimate $\beta_{0}$ and $\beta_{1}$ is the \emph{Ordinary Least Squares Method}. It minimises $Q$, the sum of the square of the differences between the observed value of $Y$ and the calculated value $\hat{Y}$. 
 \begin{equation}
 Q=\sum\limits_{i=1}^{i=n}\left( Y_{i}-\beta_{0}-\beta_{1}x_{i}  \right)^{2}
 \end{equation}
 
-The minimum is calculated by taking the partial derivatives of $Q$ with respect to $\beta_0$ and $\beta_{1}$, setting these equal to 0, and solving this set of two equations. These two equations are called the \emph{normal equations} \sidenote{Because the calculation is based on one set of $n$ observations, we will not find $\beta_{0}$ and $\beta_{1}$, but estimates $b_{0}$ and $b_{1}$ based on this sample}:
+The minimum is calculated by taking the partial derivatives of $Q$ with respect to $\beta_0$ and $\beta_{1}$, setting these equal to 0, and solving this set of two equations. These two equations are called the \emph{normal equations} \sidenote{Because the calculation is based on one set of $n$ observations, we cannot find $\beta_{0}$ and $\beta_{1}$, but estimates $b_{0}$ and $b_{1}$ based on this sample}:
 \begin{equation}
 \begin{cases}
 nb_{0}+b_{1}\sum_{i=1}^{i=n}x_{i}&=\sum_{i=1}^{i=n}y_{i} \\
@@ -535,7 +535,7 @@ and the \emph{Log Likelihood function} is:
 \ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0}=\beta_{0}^{*},\beta_{1}=\beta_{1}^{*})=n.ln(\frac{1}{\sqrt{2\pi}\sigma}) + \sum_{i=1}^{i=n} -\frac{1}{2}\left( \frac{y_{1}-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}{\sigma} \right) ^{2}
 \end{equation}
 
-Another estimate for $\beta_{0}$ than $\beta_{0}^{*}$ and for $\beta_{1}$ than $\beta_{1}^{*}$ will give another value $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$. In short: the \emph{Log Likelihood function} is a function of $\beta_{0}$ and $\beta_{1}$. The maximum of the \emph{Log Likelihood function} is found from the system of equations that we find by setting the partial derivatives of $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$ with respect to $\beta_{0}$ and $\beta_{1}$ equal to zero:
+Other estimates for $\beta_{0}$ and $\beta_{1}$ will give other values for $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$. In short: the \emph{Log Likelihood function} is a function of $\beta_{0}$ and $\beta_{1}$. The maximum of the \emph{Log Likelihood function} is found from the system of equations that we find by setting the partial derivatives of $\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})$ with respect to $\beta_{0}$ and $\beta_{1}$ equal to zero:
 \begin{equation}
 \begin{cases}
 \frac{\partial}{\partial \beta_{0}}\ell((y_{1},y_{2}, \ldots y_{n})|\beta_{0},\beta_{1})=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}\left( y_{i}-\beta_{0}-\beta_{1}x_{i} \right)=0 \\
@@ -543,7 +543,8 @@ Another estimate for $\beta_{0}$ than $\beta_{0}^{*}$ and for $\beta_{1}$ than $
 \end{cases}
 \end{equation}
 
-This is the set of \emph{normal equations} (\ref{eq:normaleq}) that we found using the \emph{Ordinary Least Squares method}. The \emph{Maximum Likelihood method} has an analytical solution, and it is the same as the one found by the \emph{Ordinary Least Squares method}.
+This is identical to the set of \emph{normal equations} (\ref{eq:normaleq}) that we found using the \emph{Ordinary Least Squares method}. The \emph{Maximum Likelihood method} in this case has an analytical solution, and it is the same as the one found by the \emph{Ordinary Least Squares method}.
+\medskip
 
 We can of course also use the numerical \emph{Newton-Raphson method} to find the maximum. The \emph{Log Likelihood function} is:
 \begin{equation}
@@ -580,8 +581,8 @@ ggplot(data=df, aes(x=x,y=y)) +
 \label{fig:linear}
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
-
-The \emph{Log Likelihood function} as a function of $\beta_{O}$ and $\beta_{1}$ looks like this (Figure~\ref{fig:lllinear})
+\medskip
+The \emph{Log Likelihood function} as a function of $\beta_{0}$ and $\beta_{1}$ looks like this (Figure~\ref{fig:lllinear})
 \medskip
 <<label=lllinear,fig=TRUE,include=FALSE, echo=TRUE>>=
 # Graph of log likelihood function as a function of betaO and beta1
@@ -607,7 +608,7 @@ persp(b0,b1,ll,theta=135,
       ticktype="detailed")
 @
 
-\begin{marginfigure}[-3cm]
+\begin{marginfigure}[-10cm]
 \includegraphics[width=1\textwidth]{NR-lllinear}
 \caption{}
 \label{fig:lllinear}
@@ -626,7 +627,7 @@ The elements of the \emph{gradient vector} are:
 \begin{equation}
 \begin{split}
 \frac{\partial}{\partial \beta_{0}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}(y_{i}-\beta_{0}^{*}-\beta_{1}^{*}x_{i}) \\
-\frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}(y_{i}-\beta_{0}^{*}-\beta_{1}^{*}x_{i})x_{i})
+\frac{\partial}{\partial \beta_{1}}\ell(\beta_{0}^{*},\beta_{1}^{*})&=\frac{1}{\sigma^{2}}\sum_{i=1}^{i=n}(y_{i}-\beta_{0}^{*}-\beta_{1}^{*}x_{i})x_{i}
 \end{split}
 \end{equation}
 
@@ -639,21 +640,24 @@ The elements of the \emph{Hessian matrix} are:
 \end{split}
 \end{equation}
 
-All we need now to start the iteration are starting values $\beta_{0}^{*}$ and $\beta_{1}^{*}$. A possible start is to use the line going defined by the couples $(x_{min},y(x_{min}))$ and $(x_{max},y(x_{max}))$:
+All we need now to start the iteration are initial values $\beta_{0}^{*}$ and $\beta_{1}^{*}$. A possible choice is to use the line  defined by the couples $(x_{min},y(x_{min}))$ and $(x_{max},y(x_{max}))$:
 \begin{equation}
 \frac{y-y(x_{min})}{x-x_{min}}=\frac{y(x_{max})-y(x_{min})}{x_{max}-x_{min}}
 \end{equation}
 
 Setting $\beta_{1}^{*}=\frac{y(x_{max})-y(x_{min})}{x_{max}-x_{min}}$ we find $\beta_{0}^{*}=y(x_{min}-\beta_1)^{*}x_{min}$.
+\medskip
 
 The iteration:
+
+\medskip
 <<>>=
 # Level beneath which the RMS first derivative is considered to be equal to zero
 level <- 1e-5
-# Initialiseren van beta0 en beta1: echte door gemiddelden en met helling bepaald door de uiterste meetpunten
+# Initialising beta0 and beta1: line through the extreme points
 dfsorted <- df[order(x),]
-b1star <- (y[n] - y[1])/(x[n] - x[1])
-b0star <- y[1] - b1star*x[1]
+b1star <- (dfsorted$y[n] - dfsorted$y[1])/(dfsorted$x[n] - dfsorted$x[1])
+b0star <- dfsorted$y[1] - b1star*dfsorted$x[1]
 beneath_level <- FALSE
 # We keep a record of the values that b0 and b1 take during the iteration
 beta.reposit <- data.frame(b0=b0star,b1=b1star)
@@ -664,14 +668,14 @@ while(!beneath_level) {
   h_hat <- solve(Hess.ll,-grad.ll)
   b0_hat <- b0star + h_hat[1]
   b1_hat <- b1star + h_hat[2]
-  # Add new value to the repository of p
+  # Add new value to the repository of b0 and b1
   beta.reposit <- rbind(beta.reposit,c(b0_hat,b1_hat))
   # Calculate the first derivative and check if it is close enough to zero (beneath the level)
   grad.ll <- matrix(c((1/sigma^2)*sum(y-b0_hat-b1_hat*x),(1/sigma^2)*sum((y-b0_hat-b1_hat*x)*x)),nrow=2,ncol=1)
   if (sqrt(grad.ll[1]^2 + grad.ll[2]^2) < level) {
     beneath_level <- TRUE
   }
-  # Put the new value of p into p0
+  # Put the new value of b0 and b1 into b0star and b1star
   b0star <- b0_hat
   b1star <- b1_hat
 }
@@ -686,7 +690,7 @@ beta.reposit
 \medskip
 We can see that our initial estimate was not bad, and that in one iteration step we numerically found the same result as the \emph{Ordinary Least Squares method}. The values of $b_{0}$ and $b_{1}$ are of course not the same as $\beta_{0}$ and $\beta_{1}$ that we used to create the sample, because this sample is only one of many due to the (normal) error.
 
-\subsection{Example 2: Estimating the co\"effici\"ents of a logistic regression model}
+\subsection{Example 2: Estimating the coefficients of a logistic regression model}
 
 We use logistic regression when the response variable $Y$ takes on only two values like (TRUE, FALSE), (Sick, Healthy)\sidenote{coded as ''1" and ''0"} ... as a function of a continuous independent variable $X$ (or continuous variables $X_{i}$). Graphically we get something like Figure~\ref{fig:scatterlogistic}.
 
@@ -713,9 +717,9 @@ We can see that for larger values of $X$ the value of $Y$ tends to be ''1", whil
 P[Y_{i}=1|X=x_{i}]=\pi_{i}
 \end{equation}
 
-Instead of trying to predict the value of $Y$ for a given value of $X$, the logistic regression predicts the probability $\pi_{i}$. This seems odd, but we should recall that, for example, a linear regression also does not give an exact formula to calculate $Y$ for $X=x_{i}$ but gives a confidence interval for the predicted value. Saying: ''I predict with 95\% confidence that for $X=15$ the value of $Y$ will be in the interval [65.2, 72.8]" is not much different from saying: ''I predict that for $X=7.5$ the probability that $Y=1$ is 76\%".
+Instead of trying to predict the value of $Y$ for a given value of $X$, the logistic regression predicts the probability $\pi_{i}$. This seems odd, but we should recall that, for example, a linear regression also does not give an exact formula to calculate $Y$ for $X=x_{i}$ but gives a confidence interval for the predicted value.
 
-In Figure~\ref{fig:scatterlogistic} we see that $P[Y_{i}]=\pi_{i}=1$ increases with $x$. A simple model could be a linear relationship:
+In Figure~\ref{fig:scatterlogistic} we see that $P[Y_{i}=1]=\pi_{i}$ increases with $x$. A simple model could be a linear relationship:
 \begin{equation}
 \pi_{i}=\beta_{0}+\beta_{1}x_{i}
 \end{equation}
@@ -730,7 +734,7 @@ The probability that $Y$ takes on the value $y_{i}=1$ or $y_{i}=0$ when $X=x_{i}
 \begin{equation}
 \begin{split}
 P[Y=y_{i}=1|X=x_{i}]&=\pi_{i} \\
-P[Y=y_{i}=0|X=x_{i}]=1-\pi_{i}
+P[Y=y_{i}=0|X=x_{i}]&=1-\pi_{i}
 \end{split}
 \end{equation}
 
@@ -741,7 +745,7 @@ P[Y=y_{i}|X=x_{i}]=\pi_{i}^{y_{i}}(1-\pi_{i})^{1-y_{i}}
 
 because for $y_{i}=1$ it gives $P[Y=y_{i}|X=x_{i}]=\pi_{i}$, and for $y_{i}=0$ it gives $P[Y=y_{i}|X=x_{i}]=(1-\pi_{i})$.
 
-The probability that we get a specific sample of $n$ observations is the \emph{Likelihood function} for this sample:
+The probability that we get this specific sample of $n$ observations is the \emph{Likelihood function} for this sample:
 \begin{equation}
 \mathcal{L}((y_{1},y_{2}, \ldots y_{n})|(\pi_{1},\pi_{2}, \ldots \pi_{n}))=\prod_{i=1}^{i=n}\pi_{i}^{y_{i}}(1-\pi_{i})^{(1-y_{i})}
 \end{equation}
@@ -759,12 +763,12 @@ When we use the \emph{logit function} to define the relationship between $\pi_{i
 \begin{equation}
 \begin{split}
 \pi_{i}&=\frac{e^{\beta_0 + \beta_{1}x_{i}}}{1+e^{\beta_0 + \beta_{1}x_{i}}}\\
-1-\pi{i}&=\frac{1}{1+e^{\beta_0 + \beta_{1}x_{i}}}=\frac{1}{1+e^{\beta_0 + \beta_{1}x_{i}}} \\
-\frac{\pi_{i}}{1-\pi{i}}&=e^{\beta_0 + \beta_{1}x_{i}}
+1-\pi_{i}&=\frac{1}{1+e^{\beta_0 + \beta_{1}x_{i}}} \\
+\frac{\pi_{i}}{1-\pi_{i}}&=e^{\beta_0 + \beta_{1}x_{i}}
 \end{split}
 \end{equation}
 
-We can write the \emph{Log Likelihood function} as a function of two variables: the parameters $\beta_{0}$ and $\beta_{1}$ of the logistic model:
+We can write the \emph{Log Likelihood function} as a function of two varia\-bles: the parameters $\beta_{0}$ and $\beta_{1}$ of the logistic model:
 \begin{equation}
 \ell(\beta_{0}, \beta_{1})=\sum_{i=1}^{i=n}y_{i}(\beta_{0}+\beta_{1}x_{i}) - \sum_{i=1}^{i=n}ln(1+e^{\beta_{0}+\beta_{1}x_{i}})
 \end{equation}
@@ -794,14 +798,14 @@ persp(b0,b1,ll,theta=135,
       ticktype="detailed")
 @
 
-\begin{marginfigure}[-3cm]
+\begin{marginfigure}[-4cm]
 \includegraphics[width=1\textwidth]{NR-lllogistic}
 \caption{}
 \label{fig:lllogistic}
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 \medskip
-Finding the maximum of this function has no analytical solution. So we use the alternative numerical method We find the values of $h_{\beta_{0}}$ and $h_{\beta_{1}}$ that will give us the values of $\beta_{0}=\beta_{0}^{*}+h_{\beta_{0}}$ and $\beta_{1}=\beta_{1}^{*}+h_{\beta_{1}}$ ($\beta_{0}^{*}$ and $\beta_{1}^{*}$ being appropriately chosen starting values) where $\ell(\beta_{0}, \beta_{1})$ reaches a maximum.
+For finding the maximum of this function there exists no analytical solution. So we use the alternative numerical method We find the values of $h_{\beta_{0}}$ and $h_{\beta_{1}}$ that will give us the values of $\beta_{0}=\beta_{0}^{*}+h_{\beta_{0}}$ and $\beta_{1}=\beta_{1}^{*}+h_{\beta_{1}}$ ($\beta_{0}^{*}$ and $\beta_{1}^{*}$ being appropriately chosen starting values) where $\ell(\beta_{0}, \beta_{1})$ reaches a maximum.
 \begin{equation}
 \textbf{Hess}(\ell(\beta_{0}^{*},\beta_{1}^{*})) \boldsymbol{\cdot} \textbf{h} = - \boldsymbol{\nabla}(\ell(\beta_{0}^{*},\beta_{1}^{*}))
 \end{equation}
@@ -832,16 +836,19 @@ The elements of the \emph{Hessian matrix} are:
 \end{split}
 \end{equation}
 
+\medskip
 We need starting values $\beta_{0}^{*}$ and $\beta_{1}^{*}$. We could start with the values that come from the linear regression:
+\medskip
 
 <<>>=
 b0star <- summary(lm(y~x))$coefficients[1]
 b1star <- summary(lm(y~x))$coefficients[2]
 @
 
-Setting $\beta_{1}^{*}=\frac{y(x_{max})-y(x_{min})}{x_{max}-x_{min}}$ we find $\beta_{0}^{*}=y(x_{min}-\beta_1)^{*}x_{min}$.
+\medskip
 
 The iteration:
+
 <<>>=
 # Level beneath which the RMS first derivative is considered to be equal to zero
 level <- 1e-5
@@ -855,14 +862,14 @@ while(!beneath_level) {
   h_hat <- solve(Hess.ll,-grad.ll)
   b0_hat <- b0star + h_hat[1]
   b1_hat <- b1star + h_hat[2]
-  # Add new value to the repository of p
+  # Add new value to the repository of b0 and b1
   beta.reposit <- rbind(beta.reposit,c(b0_hat,b1_hat))
   # Calculate the first derivative and check if it is close enough to zero (beneath the level)
   grad.ll <- matrix(c(sum(y)-sum(1/(1+exp(-b0_hat-b1_hat*x))),sum(y*x)-sum(1/(1+exp(-b0_hat-b1_hat*x))*x)),nrow=2,ncol=1)
   if (sqrt(grad.ll[1]^2 + grad.ll[2]^2) < level) {
     beneath_level <- TRUE
   }
-  # Put the new value of p into p0
+  # Put the new value of b0 and b1 into b0star and b1star
   b0star <- b0_hat
   b1star <- b1_hat
 }
@@ -872,11 +879,13 @@ paste("b0=",summary(glm(y~x,binomial))$coefficients[1,1]," and b1=",summary(glm(
 beta.reposit
 @
 
-It takes 6 iterations to find the maximum off $\ell(\beta_{0},\beta_{1})$ but the results are the same as what we obtain using the inbuilt logistic regression function in R:
+\medskip
+It takes 6 iterations to find the maximum of $\ell(\beta_{0},\beta_{1})$ but the results are the same as those that are given by the inbuilt logistic regression function in R \textit{glm()}:
 <<>>=
 summary(glm(y~x,family=binomial))
 @
 
+\medskip
 Some clever use of matrices\sidenote{"Create your Machine Learning library from scratch with R! (1/5) - Linear and logistic regression", Enhance Data Science, \url{http://enhancedatascience.com/2018/01/30/your-own-machine-learning-library-from-scratch-with-r/}} can speed up the calculation.
 
 We create the following matrices:
@@ -899,9 +908,9 @@ and
 \textbf{N} = \frac{1}{1+e^{(-\boldsymbol{\beta}^{T} \boldsymbol{\cdot} \textbf{X}^{T})}} = \begin{bmatrix} \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{1}}} & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{2}}} & \hdots & \frac{1}{1+e^{-\beta_{0}^{*} - \beta_{1}^{*}x_{n}}} \end{bmatrix}
 \end{equation}
 
-From this matrix \textbf{N} we can calculate the, element by element, multiplication
+With this matrix \textbf{N} we can do the following, element by element, multiplication:
 \begin{equation}
-\textbf{N}\textbf{(1-N)} = \begin{bmatrix} \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{1}})^{2}} & \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{2}})^{2}} & \hdots & \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{n}})^{2}}  \end{bmatrix}
+\textbf{N}\textbf{(1-N)}^{T} = \begin{bmatrix} \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{1}})^{2}} & \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{2}})^{2}} & \hdots & \sum_{i=1}^{i=n} \frac{e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{i}}}{(1 + e^{-\beta_{0}^{*}-\beta_{1}^{*}x_{n}})^{2}}  \end{bmatrix}
 \end{equation}
 
 With the R-command \textit{diag(z)} we can create the diagnonal matrix:
